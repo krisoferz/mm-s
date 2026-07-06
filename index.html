@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Piazza dell'Arte — A Commedia dell'Arte Quest</title>
+<title>Piazza dell'Arte: A Commedia dell'Arte Quest</title>
 </head>
 <body>
 <style>
@@ -20,7 +20,9 @@
   .hud-pill{background:rgba(244,233,208,.94);border:2px solid var(--ink);border-radius:12px;padding:6px 12px;font-size:15px;font-weight:bold;box-shadow:2px 3px 0 rgba(0,0,0,.35);}
   .hud-btn{cursor:pointer;transition:transform .1s;}
   .hud-btn:hover{transform:translateY(-1px);}
-  #objective{position:fixed;top:10px;right:10px;max-width:300px;background:rgba(244,233,208,.94);border:2px solid var(--ink);border-radius:12px;padding:8px 12px;font-size:13px;z-index:20;box-shadow:2px 3px 0 rgba(0,0,0,.35);}
+  #objective{position:fixed;top:10px;right:10px;max-width:280px;background:rgba(244,233,208,.94);border:2px solid var(--ink);border-radius:12px;padding:8px 12px;font-size:13px;z-index:20;box-shadow:2px 3px 0 rgba(0,0,0,.35);cursor:pointer;user-select:none;}
+  #objective.mini{padding:6px 11px;font-size:16px;}
+  #objective.mini #objective-text{display:none;}
   #prompt{position:fixed;bottom:130px;left:50%;transform:translateX(-50%);background:rgba(59,42,26,.9);color:var(--paper);padding:8px 16px;border-radius:20px;font-size:15px;z-index:20;display:none;pointer-events:none;}
 
   /* ---------- Dialog ---------- */
@@ -106,7 +108,7 @@
   <div class="hud-pill hud-btn" id="hud-journal">📖 Journal</div>
   <div class="hud-pill hud-btn" id="hud-help">❓ Help</div>
 </div>
-<div id="objective">🧭 <span id="objective-text">Explore the piazza and talk to the performers. (WASD / arrows to move, E to talk)</span></div>
+<div id="objective" title="Your current goal">🧭 <span id="objective-text">Explore the piazza and talk to the performers. (WASD / arrows to move, E to talk)</span></div>
 <div id="prompt"></div>
 
 <!-- Dialogue -->
@@ -127,11 +129,11 @@
 <div class="overlay show" id="ov-intro">
   <div class="panel">
     <h1 id="intro-title">Piazza dell'Arte</h1>
-    <p id="intro-sub">A journey into the Commedia dell'Arte · Italy, ca. 1570</p>
+    <p id="intro-sub">A journey into the Commedia dell'Arte · Italy, around 1570</p>
     <div class="masks-row">🎭 🃏 🎪 🎨 🤹</div>
-    <p>A troupe of traveling players has arrived in the piazza! Between 1550 and 1750, companies like this one toured Italy and all of Europe performing <b>commedia dell'arte</b> — fast, funny, mostly <i>improvised</i> theatre built around beloved masked characters.</p>
-    <p><b>Your quest:</b> wander the town, meet all <b>8 performers</b>, and answer their questions. Along the way, learn to <b>juggle</b> with Arlecchino, perform a <b>lazzo</b> (comic gag) with Pulcinella, and craft <b>your own mask</b> in the workshop. Collect all <b>11 stamps</b> to join the troupe's grand finale!</p>
-    <p class="small">🕹️ Move: WASD / arrow keys (or the on-screen pad) · Talk: <b>E</b> / Space (or the red button) · Journal: <b>J</b></p>
+    <p>A troupe of traveling players has arrived in the piazza! Between 1550 and 1750, companies like this one toured Italy and all of Europe performing <b>commedia dell'arte</b>: fast, funny, mostly <i>improvised</i> theatre built around beloved masked characters.</p>
+    <p><b>Your quest:</b> wander the town, meet all <b>8 performers</b>, and answer their questions. Along the way, learn to <b>juggle</b> with Arlecchino, perform a <b>lazzo</b> (a comic gag) with Pulcinella, and craft <b>your own mask</b> in the workshop. Collect all <b>11 stamps</b> to join the troupe's grand finale!</p>
+    <p class="small">🕹️ Move: WASD or arrow keys (or the touch pad) · Talk: <b>E</b> or Space (or the red button) · Journal: <b>J</b></p>
     <div class="center" style="margin-top:12px;">
       <button class="btn" id="btn-start" style="font-size:18px;padding:10px 30px;">Enter the Piazza →</button>
     </div>
@@ -145,7 +147,7 @@
     <p><b>Move</b> with WASD or arrow keys (touch: use the pad). Walk up to a character with a <b>❗</b> and press <b>E</b>, Space, or the red button to talk.</p>
     <p><b>Listen, then answer.</b> Each performer teaches you about their character and the world of commedia dell'arte, then asks one question. Answer correctly to earn their mask stamp.</p>
     <p><b>Special activities:</b> Arlecchino teaches juggling 🤹, Pulcinella teaches a lazzo 🪰, and Maestro Fava's workshop lets you design your own mask 🎭 (you can download it!).</p>
-    <p><b>What is commedia dell'arte?</b> Professional improvised comedy born in 16th-century Italy: touring troupes, stock characters in masks, plot outlines instead of scripts, acrobatics, music, and rehearsed gags called <i>lazzi</i>. Its characters echo through Punch and Judy, pantomime, clowning, and today's sitcoms.</p>
+    <p><b>What is commedia dell'arte?</b> Professional improvised comedy born in Italy in the 1500s: touring troupes, stock characters in masks, plot outlines instead of scripts, acrobatics, music, and rehearsed gags called <i>lazzi</i>. Its characters echo through Punch and Judy, pantomime, clowning, and today's sitcoms.</p>
     <div class="center"><button class="btn quiet" onclick="closeOverlay('ov-help')">Close</button></div>
   </div>
 </div>
@@ -163,7 +165,7 @@
 <div class="overlay" id="ov-juggle">
   <div class="panel">
     <h2>🤹 Arlecchino's Juggling School</h2>
-    <p class="small">Catch each ball as it falls into the golden zone: press <b>A&nbsp;S&nbsp;D</b> for the left, middle, and right ball — or tap the ball. Make <b>12 catches</b> before dropping 3 balls. More balls join as you improve!</p>
+    <p class="small">Catch each ball as it falls into the golden zone: press <b>A&nbsp;S&nbsp;D</b> for the left, middle, and right ball, or just tap the ball. Make <b>12 catches</b> before you drop 3 balls. More balls join as you improve!</p>
     <p id="jug-status">Ready?</p>
     <canvas id="jug-canvas" width="480" height="440"></canvas>
     <div class="center">
@@ -177,7 +179,7 @@
 <div class="overlay" id="ov-lazzi">
   <div class="panel">
     <h2>🪰 Pulcinella's Lazzo Lesson</h2>
-    <p class="small">A <b>lazzo</b> is a rehearsed comic routine actors could drop into any show. Pulcinella performs the moves of the famous <i>Lazzo of the Fly</i> — watch the sequence, then repeat it in the same order! Three rounds, each one longer.</p>
+    <p class="small">A <b>lazzo</b> is a rehearsed comic routine actors could drop into any show. Pulcinella performs the moves of the famous <i>Lazzo of the Fly</i>. Watch the sequence, then repeat it in the same order! Three rounds, and each one gets longer.</p>
     <p id="lazzi-status">Press "Watch" to see the routine.</p>
     <div class="lazzi-stage" id="lazzi-stage"></div>
     <div class="center">
@@ -191,7 +193,7 @@
 <div class="overlay" id="ov-mask">
   <div class="panel" style="max-width:760px;">
     <h2>🎭 Maestro Fava's Mask Workshop</h2>
-    <p class="small">Real commedia masks were pressed from soaked leather over carved wooden molds, then oiled and painted. Half-masks left the mouth free to speak and sing. Design your own — then download it and give it a name!</p>
+    <p class="small">Real commedia masks were pressed from soaked leather over carved wooden molds, then oiled and painted. Half masks left the mouth free to speak and sing. Design your own, then download it and give it a name!</p>
     <div id="mask-wrap">
       <canvas id="mask-canvas" width="300" height="330"></canvas>
       <div id="mask-controls"></div>
@@ -209,7 +211,7 @@
   <div class="panel">
     <h2 class="center">🎪 The Grand Performance! 🎪</h2>
     <p class="center" style="font-size:28px;margin:4px 0;">🎭 🃏 🤹 🎨 🪰 🎶</p>
-    <p>Torches are lit, the crowd gathers, and the troupe takes the stage — and this time, <b>you're with them</b>. You've met every character, learned the lazzi, juggled like a zanni, and made a mask of your very own. The troupe declares you an honorary player of the commedia dell'arte!</p>
+    <p>Torches are lit, the crowd gathers, and the troupe takes the stage. And this time, <b>you're with them</b>. You've met every character, learned the lazzi, juggled like a zanni, and made a mask of your very own. The troupe declares you an honorary player of the commedia dell'arte!</p>
     <div id="certificate">
       <p class="small" style="margin:0;">⚜ The Traveling Troupe of the Piazza dell'Arte ⚜</p>
       <h1>Certificate of the Commedia</h1>
@@ -236,7 +238,7 @@
 <script>
 'use strict';
 /* =========================================================================
-   PIAZZA DELL'ARTE — an educational open-world introduction to the
+   PIAZZA DELL'ARTE: an educational open world introduction to the
    commedia dell'arte. Single-file, no dependencies.
    ========================================================================= */
 
@@ -291,8 +293,23 @@ function updateHUD(){
   $('objective-text').textContent =
     n >= TOTAL_STAMPS ? 'You are an honorary player! Keep exploring, or press J to reread your journal.' :
     n === 0 ? 'Explore the piazza and talk to the performers marked ❗' :
-    `Stamps collected: ${n}/${TOTAL_STAMPS}. Find performers marked ❗ — and don't miss the juggling, the lazzo, and the mask workshop!`;
+    `Stamps collected: ${n}/${TOTAL_STAMPS}. Find performers marked ❗ and don't miss the juggling, the lazzo, and the mask workshop!`;
+  flashObjective();
 }
+
+// Show the goal for a few seconds, then shrink it to a small 🧭 pill so it
+// never blocks the world. Clicking the pill shows it again.
+let objTimer = null;
+function flashObjective(){
+  const o = $('objective');
+  o.classList.remove('mini');
+  clearTimeout(objTimer);
+  objTimer = setTimeout(()=>o.classList.add('mini'), 7000);
+}
+$('objective').addEventListener('click', ()=>{
+  if($('objective').classList.contains('mini')) flashObjective();
+  else { clearTimeout(objTimer); $('objective').classList.add('mini'); }
+});
 
 let toastTimer = null;
 function toast(msg){
@@ -318,128 +335,128 @@ const CHARACTERS = [
   x:1330, y:920,
   look:{ costume:'#d8c390', pattern:'diamonds', hat:'beret', hatColor:'#8a2f23', mask:'#4a3421', prop:'slapstick', skin:'#e8b78a' },
   pages:[
-    "Ciao, traveler! I am Arlecchino — the most famous zanni of them all! A «zanni» is a comic servant: always hungry, always scheming, always in trouble.",
-    "See my costume? Patches! Arlecchino began as a poor servant whose clothes were nothing but rags. Over many years of performing, those patches turned into this handsome diamond pattern.",
-    "And this? My batte — a wooden slapstick! When I whack old Pantalone — THWACK! — it makes a mighty crack but hurts nobody. Your phrase «slapstick comedy» comes from this very stick!",
+    "Ciao, traveler! I'm Arlecchino, the most famous zanni of them all! A zanni is a comic servant. We are always hungry, always scheming, and always in trouble.",
+    "Look at my costume. Patches! Arlecchino started out as a poor servant whose clothes were nothing but rags. After many years on stage, those patches turned into this handsome diamond pattern.",
+    "And this? My batte, a wooden slapstick! When I whack old Pantalone with it, THWACK! It makes a mighty crack but hurts nobody. The phrase 'slapstick comedy' comes from this very stick!",
     "We commedia players could do everything: tumble, dance, sing, and JUGGLE. Answer my question and I'll teach you myself!"
   ],
-  quiz:{ q:"In the commedia dell'arte, what is a «zanni»?",
+  quiz:{ q:"In the commedia dell'arte, what is a zanni?",
     options:["A comic servant character, like Arlecchino","A kind of Italian pasta","A musical instrument"],
-    answer:0, explain:"Sì! The zanni are the comic servants — the engines of the chaos. «Zanni» even gave English the word «zany»!" },
+    answer:0, explain:"Sì! The zanni are the comic servants who stir up all the chaos. The word zanni even gave English the word 'zany'!" },
   activity:'juggle',
-  journal:"Arlecchino is the most famous zanni (comic servant). His diamond-patterned costume evolved from a poor servant's patched rags, and his wooden batte gave us the word «slapstick»."
+  journal:"Arlecchino is the most famous zanni, the comic servant. His diamond costume grew out of a poor servant's patched rags, and his wooden batte gave us the word 'slapstick'."
 },
 {
   id:'colombina', name:'Colombina', role:'the clever servetta (maid)',
   x:520, y:1170,
   look:{ costume:'#7d9e63', pattern:'apron', hat:'none', hatColor:'#fff', mask:null, prop:'fan', skin:'#e8b78a', hair:'#4a3421' },
   pages:[
-    "Buongiorno! I'm Colombina, a servetta — a maid. Between us: I'm the smartest person in every scene, though the old men never seem to notice.",
-    "Unlike most of the troupe I wear little or no mask — my wit is my mask! I outsmart Pantalone, tease Arlecchino, and secretly help the young lovers get married.",
-    "Do you know what «commedia dell'arte» actually means? Roughly, «comedy of the profession». We were among Europe's first professional actors — paid to perform, touring city to city in wagons with our stage on our backs."
+    "Buongiorno! I'm Colombina, a servetta. That means a maid. Between you and me, I'm the smartest person in every scene, though the old men never seem to notice.",
+    "Unlike most of the troupe, I wear little or no mask. My wit is my mask! I outsmart Pantalone, tease Arlecchino, and secretly help the young lovers get married.",
+    "Do you know what 'commedia dell'arte' actually means? Roughly, 'comedy of the profession'. We were among Europe's first professional actors. People paid us to perform, and we toured from city to city in wagons with our stage on our backs."
   ],
-  quiz:{ q:"What does «commedia dell'arte» roughly mean?",
-    options:["Comedy of the artists' paintings","Comedy of the profession — theatre by paid, professional players","Comedy of the streets"],
-    answer:1, explain:"Esatto! «Arte» here means the profession or guild — these troupes made their living from performing, a new idea in the 1500s." },
-  journal:"Colombina, the witty maid, often performed unmasked. «Commedia dell'arte» means roughly «comedy of the profession» — its troupes were among Europe's first professional, paid actors, touring from city to city."
+  quiz:{ q:"What does 'commedia dell'arte' roughly mean?",
+    options:["Comedy of the artists' paintings","Comedy of the profession, theatre made by paid professional players","Comedy of the streets"],
+    answer:1, explain:"Esatto! 'Arte' here means the profession or the guild. These troupes made their living from performing, which was a brand new idea in the 1500s." },
+  journal:"Colombina, the witty maid, often performed without a mask. 'Commedia dell'arte' means roughly 'comedy of the profession'. Its troupes were among Europe's first professional paid actors, touring from city to city."
 },
 {
   id:'pantalone', name:'Pantalone', role:'the miserly Venetian merchant (a vecchio)',
   x:1960, y:790,
   look:{ costume:'#b03a2e', pattern:'buttons', hat:'skullcap', hatColor:'#5a1d16', mask:'#6b4a2e', cape:'#2e2020', prop:'purse', skin:'#e0a97e', beard:'#cfc4b0' },
   pages:[
-    "Hmph! I am Pantalone de' Bisognosi, merchant of Venice! Rich as a doge, and I intend to STAY that way — keep your hands off my coins!",
-    "I am one of the vecchi — the «old men» who block everyone's fun. My red suit, black cape, and hooked half-mask are famous in every city of Europe. I'm forever chasing money (or a young bride) and forever ending up the fool.",
-    "My servants trick me, my children defy me, and the crowd howls with laughter at me every single night. Outrageous!… although, I confess: laughter fills the theatre, and full theatres fill my purse. Ha!"
+    "Hmph! I am Pantalone de' Bisognosi, merchant of Venice! Rich as a doge, and I intend to STAY that way. Keep your hands off my coins!",
+    "I am one of the vecchi, the old men who spoil everyone's fun. My red suit, black cape, and hooked mask are famous in every city in Europe. I'm forever chasing money, or a young bride, and forever ending up the fool.",
+    "My servants trick me, my children defy me, and the crowd howls with laughter at me every single night. Outrageous! Although, I confess: laughter fills the theatre, and full theatres fill my purse. Ha!"
   ],
   quiz:{ q:"Pantalone and Il Dottore belong to which group of stock characters?",
-    options:["I vecchi — the foolish old men","I zanni — the comic servants","Gli innamorati — the young lovers"],
-    answer:0, explain:"Correct — and it cost you nothing to learn it, my favorite price! The vecchi are the greedy, pompous old men whose plans the young folk and servants overturn." },
-  journal:"Pantalone, the rich, stingy Venetian merchant, is a «vecchio» — one of the old men who oppose the young lovers. His red costume, black cape, and hooked mask were recognized across Europe."
+    options:["I vecchi, the foolish old men","I zanni, the comic servants","Gli innamorati, the young lovers"],
+    answer:0, explain:"Correct! And it cost you nothing to learn it, my favorite price. The vecchi are the greedy, pompous old men whose plans the young folk and the servants always overturn." },
+  journal:"Pantalone, the rich and stingy merchant of Venice, is a 'vecchio', one of the old men who stand in the young lovers' way. His red costume, black cape, and hooked mask were recognized across Europe."
 },
 {
   id:'dottore', name:'Il Dottore', role:'the pompous scholar of Bologna (a vecchio)',
   x:900, y:1350,
   look:{ costume:'#2b2b33', pattern:'none', hat:'wide', hatColor:'#1d1d24', mask:'#7a5230', belly:true, prop:'book', skin:'#e0a97e', collar:'#f4f4f4' },
   pages:[
-    "Ahem! AHEM! I am Il Dottore — Doctor Graziano of Bologna, seat of Europe's oldest university! I have mastered law, medicine, Latin, Greek, astronomy, rhetoric…",
-    "…or so I claim! In truth, I spout glorious nonsense in enormous speeches, mangling my Latin at every turn. The joke, dear student, is that the «great scholar» knows nothing at all.",
-    "But here is a TRUE piece of learning: our plays had no full script! Backstage we pinned up a canovaccio — a scenario, a simple outline of scenes — and we invented our lines fresh every night. Improvisation was our genius!"
+    "Ahem! AHEM! I am Il Dottore. Doctor Graziano of Bologna, home of Europe's oldest university! I have mastered law, medicine, Latin, Greek, astronomy, rhetoric...",
+    "...or so I claim! In truth, I spout glorious nonsense in enormous speeches and mangle my Latin at every turn. The joke, dear student, is that the 'great scholar' knows nothing at all.",
+    "But here is a TRUE piece of learning: our plays had no full script! Backstage we pinned up a canovaccio, a simple outline of the scenes, and we invented our lines fresh every night. Improvisation was our genius!"
   ],
-  quiz:{ q:"What was a «canovaccio»?",
-    options:["A doctor's bag of medicines","A plot outline the actors improvised from — no full script!","A type of leather mask"],
-    answer:1, explain:"Magnifico! Troupes performed from scenario outlines and improvised the dialogue — which is why quick wit and stock characters mattered so much." },
-  journal:"Il Dottore, the pompous «scholar» from Bologna, pretends to know everything and knows nothing. Commedia troupes used a «canovaccio» — a plot outline pinned backstage — and improvised the actual dialogue."
+  quiz:{ q:"What was a canovaccio?",
+    options:["A doctor's bag of medicines","A plot outline the actors improvised from, with no full script","A type of leather mask"],
+    answer:1, explain:"Magnifico! Troupes performed from simple scene outlines and made up the dialogue as they went. That is why quick wits and familiar characters mattered so much." },
+  journal:"Il Dottore, the pompous 'scholar' from Bologna, pretends to know everything and knows nothing. Commedia troupes worked from a 'canovaccio', a plot outline pinned up backstage, and improvised the actual dialogue."
 },
 {
   id:'capitano', name:'Il Capitano', role:'the braggart soldier',
   x:2140, y:1010,
   look:{ costume:'#3f5c8a', pattern:'sash', hat:'plume', hatColor:'#2b2b33', mask:'#a06a3a', prop:'sword', skin:'#e0a97e', mustache:true },
   pages:[
-    "HALT! You stand before Il Capitano Spavento — terror of ten-thousand battlefields, conqueror of… of… wait. Is that a SPIDER?! …Ahem. It has fled in fear of me. Naturally.",
-    "I boast of impossible victories in a booming voice — but at the first whiff of real danger, I run like a rabbit! I am the braggart soldier: all plume and no courage.",
-    "The crowds adored laughing at me. Often the Capitano spoke like the foreign soldiers occupying Italian cities — so laughing at him was a small, safe act of rebellion. Comedy can be brave… even when the Capitano is not!"
+    "HALT! You stand before Il Capitano Spavento, terror of ten thousand battlefields, conqueror of... of... wait. Is that a SPIDER?! Ahem. It has fled in fear of me. Naturally.",
+    "I boast of impossible victories in a booming voice, but at the first whiff of real danger, I run like a rabbit! I am the braggart soldier: all plume and no courage.",
+    "The crowds adored laughing at me. The Capitano often spoke like the foreign soldiers occupying Italian cities back then, so laughing at him was a small, safe act of rebellion. Comedy can be brave, even when the Capitano is not!"
   ],
   quiz:{ q:"What is Il Capitano's famous personality?",
     options:["Quiet and shy","Genuinely heroic and honest","Boastful about battles, but secretly a coward"],
-    answer:2, explain:"Ha! I would deny it, but my knees are knocking as we speak. The braggart-coward soldier let audiences laugh at the powerful." },
-  journal:"Il Capitano is the braggart soldier — booming war stories, zero courage. Mocking him often meant safely mocking the foreign armies occupying Italian cities at the time."
+    answer:2, explain:"Ha! I would deny it, but my knees are knocking as we speak. Laughing at the braggart soldier let audiences laugh safely at the powerful." },
+  journal:"Il Capitano is the braggart soldier, full of booming war stories and empty of courage. Mocking him often meant safely mocking the foreign armies occupying Italian cities at the time."
 },
 {
   id:'pulcinella', name:'Pulcinella', role:'the trickster of Naples',
   x:1660, y:1330,
   look:{ costume:'#f3ead7', pattern:'smock', hat:'sugarloaf', hatColor:'#f3ead7', mask:'#2b2b2b', hump:true, prop:'ladle', skin:'#e8b78a' },
   pages:[
-    "Ooo-eee! I am Pulcinella of Napoli — beaked black mask, white smock, and a voice like a squawking hen! Sometimes clever, sometimes a fool, ALWAYS hungry for macaroni.",
-    "When the commedia traveled to England, I put on a puppet's strings and became «Punch» of the Punch-and-Judy shows — children still watch me squabble at the seaside today! In France my cousin became Polichinelle.",
-    "Now, a trade secret: the lazzi! A lazzo is a comic bit we rehearsed until perfect — a gag we could drop into ANY show the moment the audience yawned. «The Lazzo of the Fly» — a masterpiece! Answer me this, and I'll teach it to you."
+    "Ooo! I am Pulcinella of Napoli. Beaky black mask, baggy white smock, and a voice like a squawking hen! Sometimes clever, sometimes a fool, ALWAYS hungry for macaroni.",
+    "When the commedia traveled to England, I climbed onto a puppet's strings and became 'Punch' of the Punch and Judy shows. Children still watch me squabble at the seaside today! In France, my cousin became Polichinelle.",
+    "Now, a trade secret: the lazzi! A lazzo is a comic bit we rehearsed until it was perfect, a gag we could drop into ANY show the moment the audience started yawning. 'The Lazzo of the Fly'! A masterpiece. Answer me this, and I'll teach it to you."
   ],
-  quiz:{ q:"What is a «lazzo»?",
+  quiz:{ q:"What is a lazzo?",
     options:["A rehearsed comic gag that could be dropped into any performance","A sad love song from Naples","A rope for tying up the stage wagon"],
-    answer:0, explain:"Bravo! Lazzi (that's the plural) were the troupe's secret weapons — polished bits of physical comedy, ready at a moment's notice." },
+    answer:0, explain:"Bravo! Lazzi (that's the plural) were the troupe's secret weapons: polished bits of physical comedy, ready at a moment's notice." },
   activity:'lazzi',
-  journal:"Pulcinella, the beak-nosed trickster from Naples, later became «Punch» of England's Punch-and-Judy puppet shows. «Lazzi» were rehearsed comic gags troupes could drop into any performance."
+  journal:"Pulcinella, the beaky trickster from Naples, later became 'Punch' of England's Punch and Judy puppet shows. 'Lazzi' were rehearsed comic gags that troupes could drop into any performance."
 },
 {
   id:'brighella', name:'Brighella', role:'the crafty first zanni',
   x:700, y:1000,
   look:{ costume:'#e9e4d2', pattern:'stripes', hat:'beret', hatColor:'#3f5734', mask:'#6d7a45', prop:'mandolin', skin:'#e0a97e' },
   pages:[
-    "Psst… over here. Brighella, at your service — innkeeper, schemer, fixer. For the right price I can arrange anything in this town… or ruin it. *strums mandolin innocently*",
-    "Arlecchino is the silly servant; I am the crafty one — the «first zanni» who drives the schemes. One look at my green-striped livery and olive mask and the audience knew: guard your purse.",
-    "And THAT is the beauty of our stock characters: the same beloved figures appear in every play, so any audience — in any city, speaking any language — knows us at a glance. Sound familiar? Your cartoons and sitcoms still use our trick!"
+    "Psst... over here. Brighella, at your service. Innkeeper, schemer, fixer. For the right price I can arrange anything in this town... or ruin it. *strums mandolin innocently*",
+    "Arlecchino is the silly servant. I am the crafty one, the 'first zanni' who drives the schemes. One look at my green striped livery and olive mask and the audience knew to guard their purses.",
+    "And THAT is the beauty of our stock characters. The same beloved figures appear in every play, so any audience, in any city, speaking any language, knows us at a glance. Sound familiar? Your cartoons and sitcoms still use our trick!"
   ],
   quiz:{ q:"Why did commedia troupes reuse the same stock characters in every play?",
     options:["The actors were too lazy to learn new parts","Audiences everywhere instantly recognized each character, even across languages","Masks were too expensive to replace"],
-    answer:1, explain:"Clever, clever. Instant recognition made improvised, touring theatre possible — and actors often played the same character their entire lives, perfecting it." },
-  journal:"Brighella is the cunning «first zanni» who drives the schemes. Commedia's reusable stock characters were instantly recognizable to any audience in any country — a trick modern cartoons and sitcoms still use."
+    answer:1, explain:"Clever, clever. Instant recognition is what made improvised touring theatre possible. Many actors played the same character their whole lives and polished it to perfection." },
+  journal:"Brighella is the cunning 'first zanni' who drives the schemes. Commedia's reusable stock characters were instantly recognizable to any audience in any country, a trick modern cartoons and sitcoms still use."
 },
 {
   id:'isabella', name:'Isabella', role:'an innamorata (young lover) & leading lady',
   x:1200, y:560,
   look:{ costume:'#8a4a6b', pattern:'gown', hat:'none', hatColor:'#fff', mask:null, prop:'flower', skin:'#e8b78a', hair:'#3a2a1a' },
   pages:[
-    "Welcome to our stage! I am Isabella, one of the innamorati — the young lovers. Every plot begins with us: two sweethearts kept apart, while the masked fools spin chaos all around.",
-    "Notice — no mask! We lovers perform bare-faced and in the finest fashion of the day, for the audience must see every sigh and swoon. We speak beautifully while everyone else tumbles and squawks.",
-    "I carry a proud name. Isabella Andreini of the Gelosi troupe was a true star of the 1500s — actress, poet, celebrated genius. The commedia dell'arte was one of the first places in Europe where women performed professionally on stage, to continent-wide fame."
+    "Welcome to our stage! I am Isabella, one of the innamorati, the young lovers. Every plot begins with us: two sweethearts kept apart while the masked fools spin chaos all around.",
+    "Notice: no mask! We lovers perform with bare faces, dressed in the finest fashion of the day, because the audience must see every sigh and every swoon. We speak beautifully while everyone else tumbles and squawks.",
+    "I carry a proud name. Isabella Andreini of the Gelosi troupe was a true star of the 1500s. An actress, a poet, a celebrated genius. The commedia dell'arte was one of the first places in Europe where women performed professionally on stage, and it made her famous across the continent."
   ],
   quiz:{ q:"What was remarkable about women in the commedia dell'arte?",
-    options:["Women were not allowed to perform","Women only sewed the costumes","They were among Europe's first celebrated professional actresses — like the famous Isabella Andreini"],
-    answer:2, explain:"Yes! While English theatre still used boys for female roles, Italian troupes starred professional actresses — Isabella Andreini was famous across Europe as both performer and poet." },
-  journal:"The innamorati (young lovers) perform unmasked and drive every plot. Commedia troupes included some of Europe's first celebrated professional actresses, most famously Isabella Andreini of the Gelosi troupe (1562–1604)."
+    options:["Women were not allowed to perform","Women only sewed the costumes","They were among Europe's first celebrated professional actresses, like the famous Isabella Andreini"],
+    answer:2, explain:"Yes! While English theatre still used boys for female roles, Italian troupes starred professional actresses. Isabella Andreini was famous across Europe as both a performer and a poet." },
+  journal:"The innamorati, the young lovers, perform without masks and drive every plot. Commedia troupes included some of Europe's first celebrated professional actresses, most famously Isabella Andreini of the Gelosi troupe."
 },
 {
-  id:'fava', name:'Maestro Fava', role:'mascheraio — the mask maker',
+  id:'fava', name:'Maestro Fava', role:'mascheraio (the mask maker)',
   x:440, y:590,
   look:{ costume:'#8a6f4d', pattern:'apron2', hat:'none', hatColor:'#fff', mask:null, prop:'mask', skin:'#dda87c', hair:'#8f8676', beard:'#8f8676' },
   pages:[
-    "Come in, come in! Maestro Fava, mascheraio — mask maker of this town. Every masked player you have met wears one of my children!",
-    "How is a true commedia mask born? Leather, soaked soft, is pressed and hammered over a carved wooden mold, then trimmed, oiled, and painted. A HALF-mask, mind you — the mouth stays free, for an actor must bellow, blabber, and sing!",
-    "A mask hides the face but reveals the character: Pantalone's greedy hooked nose, Arlecchino's cheeky snub, the Capitano's ferocious brow. The moment it's on, the actor's whole body must speak. Now — to the workbench! Let us make YOUR mask."
+    "Come in, come in! Maestro Fava, mascheraio. That means mask maker. Every masked player you have met wears one of my children!",
+    "How is a true commedia mask born? You soak leather until it is soft, press and hammer it over a carved wooden mold, then trim it, oil it, and paint it. And it is a HALF mask, mind you. The mouth stays free, because an actor must bellow, blabber, and sing!",
+    "A mask hides the face but reveals the character. Pantalone's greedy hooked nose. Arlecchino's cheeky snub. The Capitano's ferocious brow. The moment it goes on, the actor's whole body must do the talking. Now, to the workbench! Let us make YOUR mask."
   ],
   quiz:null,
   activity:'mask',
-  journal:"Traditional commedia masks are half-masks of leather, pressed over carved wooden molds, leaving the mouth free for speech and song. Each mask's shape instantly signals its character."
+  journal:"Traditional commedia masks are half masks of leather, pressed over carved wooden molds, with the mouth left free for speech and song. Each mask's shape instantly signals its character."
 }
 ];
 
@@ -448,9 +465,9 @@ const WORLD = { w:2500, h:1700 };
 
 const buildings = [
   // {x,y,w,h, wall, roof, label, door:x-offset}
-  { x:250,  y:330, w:300, h:210, wall:'#dcc9a3', roof:'#a34a2f', label:"Mascheraio — Mask Workshop", sign:'🎭' },
+  { x:250,  y:330, w:300, h:210, wall:'#dcc9a3', roof:'#a34a2f', label:"Mascheraio (Mask Workshop)", sign:'🎭' },
   { x:1830, y:470, w:300, h:230, wall:'#c9906b', roof:'#8a3b28', label:"Casa di Pantalone", sign:'💰' },
-  { x:250,  y:700, w:320, h:230, wall:'#e2d3ae', roof:'#976a35', label:"Locanda del Gallo — Inn", sign:'🍷' },
+  { x:250,  y:700, w:320, h:230, wall:'#e2d3ae', roof:'#976a35', label:"Locanda del Gallo (Inn)", sign:'🍷' },
   { x:1520, y:1120, w:170, h:140, wall:'#d8b98a', roof:'#7d5a34', label:"Market stall", stall:true },
   { x:1720, y:1140, w:170, h:140, wall:'#c9a06b', roof:'#5a7d4a', label:"Market stall", stall:true },
   { x:700,  y:1210, w:210, h:150, wall:'#cfc0a0', roof:'#6b6f8a', label:"Bookstalls of the Studium", stall:true },
@@ -672,8 +689,8 @@ function drawFigure(g, look, facing, step){
   if(look.hair){
     g.fillStyle = look.hair;
     g.beginPath(); g.arc(0,-49,8.6,Math.PI*1.05,Math.PI*1.95); g.fill();
-    if(look.pattern==='gown' || look.pattern==='apron'){ // long hair / bun
-      g.beginPath(); g.arc(-6,-44,3.4,0,TAU); g.fill();
+    if(look.pattern==='gown' || look.pattern==='apron'){ // side bun by the ear
+      g.beginPath(); g.arc(-9,-49,3.4,0,TAU); g.fill();
     }
   }
   // beard
@@ -1016,10 +1033,10 @@ function renderDialogPage(){
   else if(dialogState.mode === 'after'){
     let txt = progress.done[c.id] || !c.quiz ? '' : '';
     if(c.activity === 'juggle' && !progress.done.juggle){
-      $('dl-text').textContent = "Now — catch! Let's see those hands. Juggling time!";
+      $('dl-text').textContent = "Now, catch! Let's see those hands. Juggling time!";
       const b = mkBtn('🤹 Learn to juggle!', 'btn alt'); b.onclick = ()=>{ endDialog(); openJuggle(); }; $('dl-buttons').appendChild(b);
     } else if(c.activity === 'lazzi' && !progress.done.lazzi){
-      $('dl-text').textContent = "Watch closely — the Lazzo of the Fly! Then you do it, exactly as I do!";
+      $('dl-text').textContent = "Watch closely, the Lazzo of the Fly! Then you do it, exactly as I do!";
       const b = mkBtn('🪰 Learn the lazzo!', 'btn alt'); b.onclick = ()=>{ endDialog(); openLazzi(); }; $('dl-buttons').appendChild(b);
     } else if(c.activity === 'mask' && !progress.done.mask){
       $('dl-text').textContent = "To the workbench! Leather and paint await. Let us make your mask!";
@@ -1033,15 +1050,15 @@ function renderDialogPage(){
 
 function randomFarewell(c){
   const f = {
-    arlecchino:"Off you go! And remember: when in doubt — cartwheel!",
-    colombina:"Off with you — and stay cleverer than the men in masks.",
+    arlecchino:"Off you go! And remember: when in doubt, cartwheel!",
+    colombina:"Off with you, and stay cleverer than the men in masks.",
     pantalone:"Go, go! Time is money, and you're spending mine.",
-    dottore:"As Aristotle said… er… «go-eth thou hence-ly». Probably.",
+    dottore:"As Aristotle said... er... 'go forth wisely'. Probably.",
     capitano:"Onward! Tell them Il Capitano sent you. They will tremble. Probably.",
-    pulcinella:"Go, go! And if you find macaroni… you know where I live.",
-    brighella:"We never spoke. *strum* …But do come back if you need anything arranged.",
+    pulcinella:"Go, go! And if you find macaroni... you know where I live.",
+    brighella:"We never spoke. *strum* ...But do come back if you need anything arranged.",
     isabella:"Farewell, friend of the theatre. May your heart stay unmasked.",
-    fava:"A pleasure. Wear your mask proudly — and let it change how you walk!"
+    fava:"A pleasure. Wear your mask proudly, and let it change how you walk!"
   };
   return f[c.id] || 'Arrivederci!';
 }
@@ -1073,7 +1090,7 @@ function answerQuiz(i, btnEl){
   } else {
     btnEl.classList.add('wrong'); btnEl.disabled = true;
     sfx('bad');
-    $('dl-text').innerHTML = '❌ Not quite — think about what ' + c.name + ' told you, and try again!';
+    $('dl-text').innerHTML = '❌ Not quite. Think about what ' + c.name + ' told you and try again!';
   }
 }
 
@@ -1090,8 +1107,8 @@ function toggleJournal(){
     list.innerHTML = '<p class="small">You haven\'t learned anything yet. Go talk to the performers!</p>';
   } else {
     list.innerHTML = entries.map(c =>
-      `<div class="journal-entry"><b>${c.name}</b> — <i>${c.role}</i><p>${c.journal}</p></div>`).join('') +
-      `<div class="journal-entry"><b>The big picture</b><p>Commedia dell'arte flourished in Italy from the mid-1500s to the 1700s: professional touring troupes, masked stock characters, improvised dialogue from scenario outlines (canovacci), and rehearsed gags (lazzi). Its DNA lives on in Punch and Judy, pantomime, clowning, Molière — and the stock characters of today's sitcoms and cartoons.</p></div>`;
+      `<div class="journal-entry"><b>${c.name}</b>, <i>${c.role}</i><p>${c.journal}</p></div>`).join('') +
+      `<div class="journal-entry"><b>The big picture</b><p>Commedia dell'arte flourished in Italy from the mid 1500s to the 1700s: professional touring troupes, masked stock characters, improvised dialogue built on scenario outlines (canovacci), and rehearsed gags (lazzi). Its spirit lives on in Punch and Judy, pantomime, clowning, Molière, and the stock characters of today's sitcoms and cartoons.</p></div>`;
   }
   const ov = $('ov-journal');
   ov.classList.toggle('show');
@@ -1113,7 +1130,7 @@ function openJuggle(){
 }
 function jugReset(){
   jug.running = false; jug.balls = []; jug.score = 0; jug.lives = 3; jug.t = 0;
-  $('jug-status').textContent = progress.done.juggle ? 'You already earned this stamp — but juggling is always fun!' : 'Press Start. A-S-D or tap to catch!';
+  $('jug-status').textContent = progress.done.juggle ? 'You already earned this stamp, but juggling is always fun!' : 'Press Start. Use A, S, and D, or tap to catch!';
 }
 $('jug-start').onclick = () => {
   jugReset();
@@ -1230,7 +1247,7 @@ const MOVES = [
   { id:'swat',  em:'🪰', label:'Swat the Fly' },
   { id:'trip',  em:'🤸', label:'Tumble' },
   { id:'faint', em:'😵', label:'Dramatic Faint' },
-  { id:'sneak', em:'🤫', label:'Tip-toe Sneak' },
+  { id:'sneak', em:'🤫', label:'Tiptoe Sneak' },
 ];
 const lazzi = { seq:[], input:0, round:0, busy:false, awaiting:false };
 
@@ -1245,7 +1262,7 @@ function openLazzi(){
     stage.appendChild(d);
   });
   lazzi.round = 0; lazzi.busy = false; lazzi.awaiting = false;
-  $('lazzi-status').textContent = progress.done.lazzi ? 'Stamp already earned — but encore! Press Watch.' : 'Press "Watch the Routine" to begin.';
+  $('lazzi-status').textContent = progress.done.lazzi ? 'You already earned this stamp, but encore! Press Watch.' : 'Press "Watch the Routine" to begin.';
 }
 $('lazzi-quit').onclick = ()=>closeOverlay('ov-lazzi');
 $('lazzi-start').onclick = ()=>{ if(!lazzi.busy) lazziRound(lazzi.round); };
@@ -1255,7 +1272,7 @@ function lazziRound(r){
   lazzi.seq = Array.from({length:len}, ()=>Math.floor(Math.random()*MOVES.length));
   lazzi.input = 0; lazzi.busy = true; lazzi.awaiting = false;
   $('lazzi-start').style.display = 'none';
-  $('lazzi-status').textContent = `Round ${r+1} of 3 — watch Pulcinella! 👀`;
+  $('lazzi-status').textContent = `Round ${r+1} of 3. Watch Pulcinella! 👀`;
   const tiles = [...document.querySelectorAll('.lazzi-move')];
   let i = 0;
   const step = ()=>{
@@ -1287,7 +1304,7 @@ function lazziPress(i, el){
         $('lazzi-start').textContent = 'Encore?'; $('lazzi-start').style.display = '';
         lazzi.round = 0;
       } else {
-        $('lazzi-status').textContent = `Bravo! Round ${lazzi.round} done — the next is longer…`;
+        $('lazzi-status').textContent = `Bravo! Round ${lazzi.round} done. The next one is longer...`;
         setTimeout(()=>lazziRound(lazzi.round), 1100);
       }
     }
@@ -1295,7 +1312,7 @@ function lazziPress(i, el){
     el.classList.add('bad'); sfx('bad');
     setTimeout(()=>el.classList.remove('bad'), 350);
     lazzi.awaiting = false;
-    $('lazzi-status').textContent = '"No no no!" squawks Pulcinella. Watch once more…';
+    $('lazzi-status').textContent = '"No no no!" squawks Pulcinella. Watch one more time...';
     setTimeout(()=>lazziRound(lazzi.round), 1200);
   }
 }
@@ -1305,10 +1322,10 @@ const maskOpts = {
   base:'half', color:'#c9a227', pattern:'none', eyes:'round', nose:'snub', trim:'gold', feather:'none'
 };
 const MASK_CHOICES = {
-  base:   [['half','Half-mask'],['full','Full mask'],['zanni','Long-nose zanni']],
+  base:   [['half','Half mask'],['full','Full mask'],['zanni','Zanni with a long nose']],
   color:  ['#c9a227','#b03a2e','#3f5c8a','#4f6b3a','#2b2b2b','#f3ead7','#8a4a6b','#a06a3a'],
   pattern:[['none','Plain'],['diamonds','Harlequin diamonds'],['checks','Checkerboard'],['stars','Stars']],
-  eyes:   [['round','Round'],['cat','Sly cat-eye'],['sad','Weeping']],
+  eyes:   [['round','Round'],['cat','Sly cat eye'],['sad','Weeping']],
   nose:   [['snub','Cheeky snub'],['hook','Greedy hook'],['long','Comic beak']],
   trim:   [['gold','Gold trim'],['silver','Silver trim'],['none','No trim']],
   feather:[['none','No feather'],['#c94a5a','Red feather'],['#3f5c8a','Blue feather'],['#c9a227','Gold feather']],
@@ -1344,7 +1361,7 @@ function buildMaskControls(){
     box.appendChild(row);
   }
   const hint = document.createElement('p'); hint.className = 'small';
-  hint.innerHTML = 'Tip: a <b>hooked nose</b> says Pantalone, a <b>long beak</b> says the zanni, <b>diamonds</b> say Arlecchino. What does <i>your</i> mask say?';
+  hint.innerHTML = 'Tip: a <b>hooked nose</b> says Pantalone, a <b>long beak</b> says the zanni, and <b>diamonds</b> say Arlecchino. What does <i>your</i> mask say?';
   box.appendChild(hint);
 }
 
@@ -1476,7 +1493,7 @@ function drawMask(){
 
   // caption
   mg.fillStyle = 'rgba(59,42,26,.7)'; mg.font = 'italic 13px Georgia'; mg.textAlign = 'center';
-  mg.fillText('La tua maschera — your mask', W/2, H-12);
+  mg.fillText('La tua maschera (your mask)', W/2, H-12);
 }
 
 $('mask-download').onclick = ()=>{
@@ -1485,7 +1502,7 @@ $('mask-download').onclick = ()=>{
     a.download = 'my-commedia-mask.png';
     a.href = MC.toDataURL('image/png');
     a.click();
-  }catch(e){ toast('Could not download here — but your mask still counts!'); }
+  }catch(e){ toast('Could not download here, but your mask still counts!'); }
 };
 $('mask-done').onclick = ()=>{
   awardStamp('mask', 'Mask of your own');
