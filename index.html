@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Piazza dell'Arte — A Commedia dell'Arte Quest</title>
+</head>
+<body>
+<style>
+  :root{
+    --ink:#3b2a1a; --paper:#f4e9d0; --paper2:#eaddc0; --gold:#c9a227; --red:#a3402f; --green:#4f6b3a;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden;background:#20180f;font-family:Georgia,'Times New Roman',serif;color:var(--ink);}
+  #game{display:block;width:100vw;height:100vh;image-rendering:auto;}
+  button{font-family:inherit;}
+
+  /* ---------- HUD ---------- */
+  #hud{position:fixed;top:10px;left:10px;display:flex;gap:8px;align-items:center;z-index:20;user-select:none;}
+  .hud-pill{background:rgba(244,233,208,.94);border:2px solid var(--ink);border-radius:12px;padding:6px 12px;font-size:15px;font-weight:bold;box-shadow:2px 3px 0 rgba(0,0,0,.35);}
+  .hud-btn{cursor:pointer;transition:transform .1s;}
+  .hud-btn:hover{transform:translateY(-1px);}
+  #objective{position:fixed;top:10px;right:10px;max-width:300px;background:rgba(244,233,208,.94);border:2px solid var(--ink);border-radius:12px;padding:8px 12px;font-size:13px;z-index:20;box-shadow:2px 3px 0 rgba(0,0,0,.35);}
+  #prompt{position:fixed;bottom:130px;left:50%;transform:translateX(-50%);background:rgba(59,42,26,.9);color:var(--paper);padding:8px 16px;border-radius:20px;font-size:15px;z-index:20;display:none;pointer-events:none;}
+
+  /* ---------- Dialog ---------- */
+  #dialog{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(720px,94vw);background:var(--paper);border:3px solid var(--ink);border-radius:14px;padding:12px;display:none;z-index:30;box-shadow:0 8px 24px rgba(0,0,0,.5);}
+  #dialog .row{display:flex;gap:12px;align-items:flex-start;}
+  #dl-portrait{width:110px;height:140px;flex:0 0 auto;background:var(--paper2);border:2px solid var(--ink);border-radius:10px;}
+  #dl-name{font-size:18px;font-weight:bold;margin:0 0 4px;color:var(--red);}
+  #dl-role{font-size:12px;font-style:italic;opacity:.75;margin:0 0 6px;}
+  #dl-text{font-size:15.5px;line-height:1.45;min-height:64px;margin:0;}
+  #dl-buttons{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
+  .btn{background:var(--red);color:#fff;border:2px solid var(--ink);border-radius:10px;padding:8px 18px;font-size:15px;cursor:pointer;box-shadow:2px 2px 0 rgba(0,0,0,.3);}
+  .btn:hover{filter:brightness(1.1);}
+  .btn.alt{background:var(--green);}
+  .btn.quiet{background:#8a7a5c;}
+  .quiz-opt{display:block;width:100%;text-align:left;background:#fff8e8;color:var(--ink);border:2px solid var(--ink);border-radius:10px;padding:9px 12px;font-size:14.5px;margin-top:6px;cursor:pointer;}
+  .quiz-opt:hover{background:#ffeebb;}
+  .quiz-opt.right{background:#bfe3a6;}
+  .quiz-opt.wrong{background:#e8b0a5;}
+
+  /* ---------- Overlays ---------- */
+  .overlay{position:fixed;inset:0;background:rgba(20,14,8,.78);display:none;align-items:center;justify-content:center;z-index:40;padding:12px;}
+  .overlay.show{display:flex;}
+  .panel{background:var(--paper);border:3px solid var(--ink);border-radius:16px;padding:18px 20px;max-width:640px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,.6);}
+  .panel h2{margin:0 0 8px;color:var(--red);font-size:24px;}
+  .panel h3{margin:14px 0 4px;color:var(--green);font-size:16px;}
+  .panel p{font-size:14.5px;line-height:1.5;margin:6px 0;}
+  .panel .small{font-size:12.5px;opacity:.8;}
+  .center{text-align:center;}
+
+  /* Intro */
+  #intro-title{font-size:34px;margin:0;color:var(--red);text-align:center;letter-spacing:1px;}
+  #intro-sub{text-align:center;font-style:italic;margin:2px 0 12px;}
+  .masks-row{display:flex;justify-content:center;gap:6px;font-size:26px;margin:8px 0;}
+
+  /* Juggle */
+  #jug-canvas{display:block;margin:8px auto;background:#e9dcbb;border:2px solid var(--ink);border-radius:10px;max-width:100%;touch-action:none;}
+  #jug-status{text-align:center;font-weight:bold;font-size:16px;margin:4px 0;}
+
+  /* Lazzi */
+  .lazzi-stage{display:flex;justify-content:center;gap:10px;margin:14px 0;flex-wrap:wrap;}
+  .lazzi-move{width:104px;padding:10px 4px;background:#fff8e8;border:3px solid var(--ink);border-radius:12px;font-size:15px;text-align:center;cursor:pointer;user-select:none;transition:transform .08s, background .08s;}
+  .lazzi-move .em{font-size:34px;display:block;}
+  .lazzi-move.lit{background:#ffd76e;transform:scale(1.1);}
+  .lazzi-move.good{background:#bfe3a6;}
+  .lazzi-move.bad{background:#e8b0a5;}
+  #lazzi-status{text-align:center;font-size:16px;font-weight:bold;min-height:24px;}
+
+  /* Mask maker */
+  #mask-wrap{display:flex;gap:16px;flex-wrap:wrap;}
+  #mask-canvas{background:#efe3c4;border:2px solid var(--ink);border-radius:12px;flex:0 0 auto;}
+  #mask-controls{flex:1;min-width:230px;}
+  .opt-row{margin:6px 0;}
+  .opt-row .lbl{font-size:12px;font-weight:bold;text-transform:uppercase;letter-spacing:.6px;opacity:.7;display:block;margin-bottom:3px;}
+  .chip{display:inline-block;border:2px solid var(--ink);border-radius:8px;padding:4px 9px;font-size:13px;margin:2px 3px 2px 0;cursor:pointer;background:#fff8e8;}
+  .chip.sel{background:var(--gold);color:#fff;font-weight:bold;}
+  .swatch{display:inline-block;width:26px;height:26px;border-radius:50%;border:2px solid var(--ink);margin:2px 4px 2px 0;cursor:pointer;vertical-align:middle;}
+  .swatch.sel{outline:3px solid var(--gold);}
+
+  /* Journal */
+  .journal-entry{border-left:4px solid var(--gold);padding:4px 10px;margin:8px 0;background:#fff8e8;border-radius:0 8px 8px 0;}
+  .journal-entry b{color:var(--red);}
+  .journal-entry p{margin:3px 0;font-size:13.5px;}
+
+  /* Touch controls */
+  #touch-ui{position:fixed;inset:0;z-index:25;pointer-events:none;display:none;}
+  #dpad{position:absolute;left:16px;bottom:18px;width:150px;height:150px;}
+  .dbtn{position:absolute;width:50px;height:50px;background:rgba(244,233,208,.85);border:2px solid var(--ink);border-radius:12px;font-size:20px;display:flex;align-items:center;justify-content:center;pointer-events:auto;user-select:none;}
+  .dbtn:active{background:var(--gold);}
+  #d-up{left:50px;top:0;} #d-down{left:50px;top:100px;} #d-left{left:0;top:50px;} #d-right{left:100px;top:50px;}
+  #act-btn{position:absolute;right:22px;bottom:40px;width:74px;height:74px;border-radius:50%;background:rgba(163,64,47,.92);color:#fff;border:3px solid var(--ink);font-size:15px;font-weight:bold;pointer-events:auto;user-select:none;display:flex;align-items:center;justify-content:center;}
+  #act-btn:active{background:var(--gold);}
+
+  /* Certificate */
+  #certificate{background:#fffdf4;border:6px double var(--gold);border-radius:6px;padding:18px;text-align:center;margin-top:10px;}
+  #certificate h1{font-size:22px;color:var(--red);margin:4px 0;}
+  #cert-name-in{font-family:inherit;font-size:16px;padding:6px 10px;border:2px solid var(--ink);border-radius:8px;width:min(280px,80%);text-align:center;}
+</style>
+
+<canvas id="game"></canvas>
+
+<div id="hud">
+  <div class="hud-pill" id="hud-masks">🎭 0 / 11</div>
+  <div class="hud-pill hud-btn" id="hud-journal">📖 Journal</div>
+  <div class="hud-pill hud-btn" id="hud-help">❓ Help</div>
+</div>
+<div id="objective">🧭 <span id="objective-text">Explore the piazza and talk to the performers. (WASD / arrows to move, E to talk)</span></div>
+<div id="prompt"></div>
+
+<!-- Dialogue -->
+<div id="dialog">
+  <div class="row">
+    <canvas id="dl-portrait" width="110" height="140"></canvas>
+    <div style="flex:1;min-width:0;">
+      <p id="dl-name"></p>
+      <p id="dl-role"></p>
+      <p id="dl-text"></p>
+      <div id="dl-quiz"></div>
+    </div>
+  </div>
+  <div id="dl-buttons"></div>
+</div>
+
+<!-- Intro -->
+<div class="overlay show" id="ov-intro">
+  <div class="panel">
+    <h1 id="intro-title">Piazza dell'Arte</h1>
+    <p id="intro-sub">A journey into the Commedia dell'Arte · Italy, ca. 1570</p>
+    <div class="masks-row">🎭 🃏 🎪 🎨 🤹</div>
+    <p>A troupe of traveling players has arrived in the piazza! Between 1550 and 1750, companies like this one toured Italy and all of Europe performing <b>commedia dell'arte</b> — fast, funny, mostly <i>improvised</i> theatre built around beloved masked characters.</p>
+    <p><b>Your quest:</b> wander the town, meet all <b>8 performers</b>, and answer their questions. Along the way, learn to <b>juggle</b> with Arlecchino, perform a <b>lazzo</b> (comic gag) with Pulcinella, and craft <b>your own mask</b> in the workshop. Collect all <b>11 stamps</b> to join the troupe's grand finale!</p>
+    <p class="small">🕹️ Move: WASD / arrow keys (or the on-screen pad) · Talk: <b>E</b> / Space (or the red button) · Journal: <b>J</b></p>
+    <div class="center" style="margin-top:12px;">
+      <button class="btn" id="btn-start" style="font-size:18px;padding:10px 30px;">Enter the Piazza →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Help -->
+<div class="overlay" id="ov-help">
+  <div class="panel">
+    <h2>❓ Help</h2>
+    <p><b>Move</b> with WASD or arrow keys (touch: use the pad). Walk up to a character with a <b>❗</b> and press <b>E</b>, Space, or the red button to talk.</p>
+    <p><b>Listen, then answer.</b> Each performer teaches you about their character and the world of commedia dell'arte, then asks one question. Answer correctly to earn their mask stamp.</p>
+    <p><b>Special activities:</b> Arlecchino teaches juggling 🤹, Pulcinella teaches a lazzo 🪰, and Maestro Fava's workshop lets you design your own mask 🎭 (you can download it!).</p>
+    <p><b>What is commedia dell'arte?</b> Professional improvised comedy born in 16th-century Italy: touring troupes, stock characters in masks, plot outlines instead of scripts, acrobatics, music, and rehearsed gags called <i>lazzi</i>. Its characters echo through Punch and Judy, pantomime, clowning, and today's sitcoms.</p>
+    <div class="center"><button class="btn quiet" onclick="closeOverlay('ov-help')">Close</button></div>
+  </div>
+</div>
+
+<!-- Journal -->
+<div class="overlay" id="ov-journal">
+  <div class="panel">
+    <h2>📖 Traveler's Journal</h2>
+    <div id="journal-list"><p class="small">You haven't learned anything yet. Go talk to the performers!</p></div>
+    <div class="center" style="margin-top:8px;"><button class="btn quiet" onclick="closeOverlay('ov-journal')">Close</button></div>
+  </div>
+</div>
+
+<!-- Juggling -->
+<div class="overlay" id="ov-juggle">
+  <div class="panel">
+    <h2>🤹 Arlecchino's Juggling School</h2>
+    <p class="small">Catch each ball as it falls into the golden zone: press <b>A&nbsp;S&nbsp;D</b> for the left, middle, and right ball — or tap the ball. Make <b>12 catches</b> before dropping 3 balls. More balls join as you improve!</p>
+    <p id="jug-status">Ready?</p>
+    <canvas id="jug-canvas" width="480" height="440"></canvas>
+    <div class="center">
+      <button class="btn alt" id="jug-start">Start Juggling</button>
+      <button class="btn quiet" id="jug-quit">Leave</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lazzi -->
+<div class="overlay" id="ov-lazzi">
+  <div class="panel">
+    <h2>🪰 Pulcinella's Lazzo Lesson</h2>
+    <p class="small">A <b>lazzo</b> is a rehearsed comic routine actors could drop into any show. Pulcinella performs the moves of the famous <i>Lazzo of the Fly</i> — watch the sequence, then repeat it in the same order! Three rounds, each one longer.</p>
+    <p id="lazzi-status">Press "Watch" to see the routine.</p>
+    <div class="lazzi-stage" id="lazzi-stage"></div>
+    <div class="center">
+      <button class="btn alt" id="lazzi-start">Watch the Routine</button>
+      <button class="btn quiet" id="lazzi-quit">Leave</button>
+    </div>
+  </div>
+</div>
+
+<!-- Mask maker -->
+<div class="overlay" id="ov-mask">
+  <div class="panel" style="max-width:760px;">
+    <h2>🎭 Maestro Fava's Mask Workshop</h2>
+    <p class="small">Real commedia masks were pressed from soaked leather over carved wooden molds, then oiled and painted. Half-masks left the mouth free to speak and sing. Design your own — then download it and give it a name!</p>
+    <div id="mask-wrap">
+      <canvas id="mask-canvas" width="300" height="330"></canvas>
+      <div id="mask-controls"></div>
+    </div>
+    <div class="center" style="margin-top:10px;">
+      <button class="btn alt" id="mask-download">⬇ Download my mask</button>
+      <button class="btn" id="mask-done">Finish my mask ✔</button>
+      <button class="btn quiet" onclick="closeOverlay('ov-mask')">Leave</button>
+    </div>
+  </div>
+</div>
+
+<!-- Finale -->
+<div class="overlay" id="ov-finale">
+  <div class="panel">
+    <h2 class="center">🎪 The Grand Performance! 🎪</h2>
+    <p class="center" style="font-size:28px;margin:4px 0;">🎭 🃏 🤹 🎨 🪰 🎶</p>
+    <p>Torches are lit, the crowd gathers, and the troupe takes the stage — and this time, <b>you're with them</b>. You've met every character, learned the lazzi, juggled like a zanni, and made a mask of your very own. The troupe declares you an honorary player of the commedia dell'arte!</p>
+    <div id="certificate">
+      <p class="small" style="margin:0;">⚜ The Traveling Troupe of the Piazza dell'Arte ⚜</p>
+      <h1>Certificate of the Commedia</h1>
+      <p>proudly presented to</p>
+      <input id="cert-name-in" placeholder="write your name here" maxlength="30">
+      <p style="margin-top:8px;">for meeting all eight stock characters, performing a lazzo,<br>juggling like Arlecchino, and crafting an original mask.</p>
+      <p class="small" id="cert-date"></p>
+    </div>
+    <div class="center" style="margin-top:10px;">
+      <button class="btn quiet" onclick="closeOverlay('ov-finale')">Keep exploring the piazza</button>
+    </div>
+  </div>
+</div>
+
+<!-- Touch UI -->
+<div id="touch-ui">
+  <div id="dpad">
+    <div class="dbtn" id="d-up">▲</div><div class="dbtn" id="d-down">▼</div>
+    <div class="dbtn" id="d-left">◀</div><div class="dbtn" id="d-right">▶</div>
+  </div>
+  <div id="act-btn">TALK</div>
+</div>
+
+<script>
+'use strict';
+/* =========================================================================
+   PIAZZA DELL'ARTE — an educational open-world introduction to the
+   commedia dell'arte. Single-file, no dependencies.
+   ========================================================================= */
+
+// ---------------------------------------------------------------- utilities
+const $ = id => document.getElementById(id);
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const TAU = Math.PI * 2;
+
+function openOverlay(id){ $(id).classList.add('show'); }
+function closeOverlay(id){ $(id).classList.remove('show'); }
+window.closeOverlay = closeOverlay;
+
+// Tiny sound effects (WebAudio, safe to fail silently)
+let AC = null;
+function sfx(kind){
+  try{
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    const t = AC.currentTime;
+    const notes = {
+      talk:[[440,.06]], good:[[523,.09],[659,.09],[784,.14]], bad:[[220,.18],[185,.2]],
+      catch:[[660,.05]], drop:[[180,.2]], stamp:[[523,.08],[784,.1],[1046,.18]], step:[[300,.03]]
+    }[kind] || [[440,.05]];
+    let when = t;
+    for(const [f,d] of notes){
+      const o = AC.createOscillator(), g = AC.createGain();
+      o.type = 'triangle'; o.frequency.value = f;
+      g.gain.setValueAtTime(.12, when); g.gain.exponentialRampToValueAtTime(.001, when + d);
+      o.connect(g).connect(AC.destination); o.start(when); o.stop(when + d);
+      when += d * .8;
+    }
+  }catch(e){/* no audio, no problem */}
+}
+
+// ---------------------------------------------------------------- save data
+const SAVE_KEY = 'piazzaDellArteSave1';
+let progress = { done:{}, certName:'' };
+try{ const s = localStorage.getItem(SAVE_KEY); if(s) progress = Object.assign(progress, JSON.parse(s)); }catch(e){}
+function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(progress)); }catch(e){} }
+
+const TOTAL_STAMPS = 11; // 8 characters + juggle + lazzo + mask
+function stampCount(){ return Object.keys(progress.done).length; }
+function awardStamp(id, label){
+  if(progress.done[id]) return;
+  progress.done[id] = true; save(); sfx('stamp');
+  updateHUD();
+  toast(`🎭 Stamp earned: ${label}! (${stampCount()}/${TOTAL_STAMPS})`);
+  if(stampCount() >= TOTAL_STAMPS) setTimeout(showFinale, 900);
+}
+function updateHUD(){
+  $('hud-masks').textContent = `🎭 ${stampCount()} / ${TOTAL_STAMPS}`;
+  const n = stampCount();
+  $('objective-text').textContent =
+    n >= TOTAL_STAMPS ? 'You are an honorary player! Keep exploring, or press J to reread your journal.' :
+    n === 0 ? 'Explore the piazza and talk to the performers marked ❗' :
+    `Stamps collected: ${n}/${TOTAL_STAMPS}. Find performers marked ❗ — and don't miss the juggling, the lazzo, and the mask workshop!`;
+}
+
+let toastTimer = null;
+function toast(msg){
+  const p = $('prompt');
+  p.textContent = msg; p.style.display = 'block';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ p.style.display = 'none'; toastTimer = null; }, 3200);
+}
+
+function showFinale(){
+  $('cert-date').textContent = 'Awarded in the piazza, this day ' + new Date().toLocaleDateString();
+  $('cert-name-in').value = progress.certName || '';
+  openOverlay('ov-finale');
+}
+$('cert-name-in').addEventListener('input', e => { progress.certName = e.target.value; save(); });
+
+// ---------------------------------------------------------------- characters
+/* Each character: world position, a "look" for the procedural sprite,
+   dialogue pages, one quiz, an optional activity, and a journal entry. */
+const CHARACTERS = [
+{
+  id:'arlecchino', name:'Arlecchino', role:'the acrobatic zanni (comic servant)',
+  x:1330, y:920,
+  look:{ costume:'#d8c390', pattern:'diamonds', hat:'beret', hatColor:'#8a2f23', mask:'#4a3421', prop:'slapstick', skin:'#e8b78a' },
+  pages:[
+    "Ciao, traveler! I am Arlecchino — the most famous zanni of them all! A «zanni» is a comic servant: always hungry, always scheming, always in trouble.",
+    "See my costume? Patches! Arlecchino began as a poor servant whose clothes were nothing but rags. Over many years of performing, those patches turned into this handsome diamond pattern.",
+    "And this? My batte — a wooden slapstick! When I whack old Pantalone — THWACK! — it makes a mighty crack but hurts nobody. Your phrase «slapstick comedy» comes from this very stick!",
+    "We commedia players could do everything: tumble, dance, sing, and JUGGLE. Answer my question and I'll teach you myself!"
+  ],
+  quiz:{ q:"In the commedia dell'arte, what is a «zanni»?",
+    options:["A comic servant character, like Arlecchino","A kind of Italian pasta","A musical instrument"],
+    answer:0, explain:"Sì! The zanni are the comic servants — the engines of the chaos. «Zanni» even gave English the word «zany»!" },
+  activity:'juggle',
+  journal:"Arlecchino is the most famous zanni (comic servant). His diamond-patterned costume evolved from a poor servant's patched rags, and his wooden batte gave us the word «slapstick»."
+},
+{
+  id:'colombina', name:'Colombina', role:'the clever servetta (maid)',
+  x:520, y:1170,
+  look:{ costume:'#7d9e63', pattern:'apron', hat:'none', hatColor:'#fff', mask:null, prop:'fan', skin:'#e8b78a', hair:'#4a3421' },
+  pages:[
+    "Buongiorno! I'm Colombina, a servetta — a maid. Between us: I'm the smartest person in every scene, though the old men never seem to notice.",
+    "Unlike most of the troupe I wear little or no mask — my wit is my mask! I outsmart Pantalone, tease Arlecchino, and secretly help the young lovers get married.",
+    "Do you know what «commedia dell'arte» actually means? Roughly, «comedy of the profession». We were among Europe's first professional actors — paid to perform, touring city to city in wagons with our stage on our backs."
+  ],
+  quiz:{ q:"What does «commedia dell'arte» roughly mean?",
+    options:["Comedy of the artists' paintings","Comedy of the profession — theatre by paid, professional players","Comedy of the streets"],
+    answer:1, explain:"Esatto! «Arte» here means the profession or guild — these troupes made their living from performing, a new idea in the 1500s." },
+  journal:"Colombina, the witty maid, often performed unmasked. «Commedia dell'arte» means roughly «comedy of the profession» — its troupes were among Europe's first professional, paid actors, touring from city to city."
+},
+{
+  id:'pantalone', name:'Pantalone', role:'the miserly Venetian merchant (a vecchio)',
+  x:1960, y:790,
+  look:{ costume:'#b03a2e', pattern:'buttons', hat:'skullcap', hatColor:'#5a1d16', mask:'#6b4a2e', cape:'#2e2020', prop:'purse', skin:'#e0a97e', beard:'#cfc4b0' },
+  pages:[
+    "Hmph! I am Pantalone de' Bisognosi, merchant of Venice! Rich as a doge, and I intend to STAY that way — keep your hands off my coins!",
+    "I am one of the vecchi — the «old men» who block everyone's fun. My red suit, black cape, and hooked half-mask are famous in every city of Europe. I'm forever chasing money (or a young bride) and forever ending up the fool.",
+    "My servants trick me, my children defy me, and the crowd howls with laughter at me every single night. Outrageous!… although, I confess: laughter fills the theatre, and full theatres fill my purse. Ha!"
+  ],
+  quiz:{ q:"Pantalone and Il Dottore belong to which group of stock characters?",
+    options:["I vecchi — the foolish old men","I zanni — the comic servants","Gli innamorati — the young lovers"],
+    answer:0, explain:"Correct — and it cost you nothing to learn it, my favorite price! The vecchi are the greedy, pompous old men whose plans the young folk and servants overturn." },
+  journal:"Pantalone, the rich, stingy Venetian merchant, is a «vecchio» — one of the old men who oppose the young lovers. His red costume, black cape, and hooked mask were recognized across Europe."
+},
+{
+  id:'dottore', name:'Il Dottore', role:'the pompous scholar of Bologna (a vecchio)',
+  x:900, y:1350,
+  look:{ costume:'#2b2b33', pattern:'none', hat:'wide', hatColor:'#1d1d24', mask:'#7a5230', belly:true, prop:'book', skin:'#e0a97e', collar:'#f4f4f4' },
+  pages:[
+    "Ahem! AHEM! I am Il Dottore — Doctor Graziano of Bologna, seat of Europe's oldest university! I have mastered law, medicine, Latin, Greek, astronomy, rhetoric…",
+    "…or so I claim! In truth, I spout glorious nonsense in enormous speeches, mangling my Latin at every turn. The joke, dear student, is that the «great scholar» knows nothing at all.",
+    "But here is a TRUE piece of learning: our plays had no full script! Backstage we pinned up a canovaccio — a scenario, a simple outline of scenes — and we invented our lines fresh every night. Improvisation was our genius!"
+  ],
+  quiz:{ q:"What was a «canovaccio»?",
+    options:["A doctor's bag of medicines","A plot outline the actors improvised from — no full script!","A type of leather mask"],
+    answer:1, explain:"Magnifico! Troupes performed from scenario outlines and improvised the dialogue — which is why quick wit and stock characters mattered so much." },
+  journal:"Il Dottore, the pompous «scholar» from Bologna, pretends to know everything and knows nothing. Commedia troupes used a «canovaccio» — a plot outline pinned backstage — and improvised the actual dialogue."
+},
+{
+  id:'capitano', name:'Il Capitano', role:'the braggart soldier',
+  x:2140, y:1010,
+  look:{ costume:'#3f5c8a', pattern:'sash', hat:'plume', hatColor:'#2b2b33', mask:'#a06a3a', prop:'sword', skin:'#e0a97e', mustache:true },
+  pages:[
+    "HALT! You stand before Il Capitano Spavento — terror of ten-thousand battlefields, conqueror of… of… wait. Is that a SPIDER?! …Ahem. It has fled in fear of me. Naturally.",
+    "I boast of impossible victories in a booming voice — but at the first whiff of real danger, I run like a rabbit! I am the braggart soldier: all plume and no courage.",
+    "The crowds adored laughing at me. Often the Capitano spoke like the foreign soldiers occupying Italian cities — so laughing at him was a small, safe act of rebellion. Comedy can be brave… even when the Capitano is not!"
+  ],
+  quiz:{ q:"What is Il Capitano's famous personality?",
+    options:["Quiet and shy","Genuinely heroic and honest","Boastful about battles, but secretly a coward"],
+    answer:2, explain:"Ha! I would deny it, but my knees are knocking as we speak. The braggart-coward soldier let audiences laugh at the powerful." },
+  journal:"Il Capitano is the braggart soldier — booming war stories, zero courage. Mocking him often meant safely mocking the foreign armies occupying Italian cities at the time."
+},
+{
+  id:'pulcinella', name:'Pulcinella', role:'the trickster of Naples',
+  x:1660, y:1330,
+  look:{ costume:'#f3ead7', pattern:'smock', hat:'sugarloaf', hatColor:'#f3ead7', mask:'#2b2b2b', hump:true, prop:'ladle', skin:'#e8b78a' },
+  pages:[
+    "Ooo-eee! I am Pulcinella of Napoli — beaked black mask, white smock, and a voice like a squawking hen! Sometimes clever, sometimes a fool, ALWAYS hungry for macaroni.",
+    "When the commedia traveled to England, I put on a puppet's strings and became «Punch» of the Punch-and-Judy shows — children still watch me squabble at the seaside today! In France my cousin became Polichinelle.",
+    "Now, a trade secret: the lazzi! A lazzo is a comic bit we rehearsed until perfect — a gag we could drop into ANY show the moment the audience yawned. «The Lazzo of the Fly» — a masterpiece! Answer me this, and I'll teach it to you."
+  ],
+  quiz:{ q:"What is a «lazzo»?",
+    options:["A rehearsed comic gag that could be dropped into any performance","A sad love song from Naples","A rope for tying up the stage wagon"],
+    answer:0, explain:"Bravo! Lazzi (that's the plural) were the troupe's secret weapons — polished bits of physical comedy, ready at a moment's notice." },
+  activity:'lazzi',
+  journal:"Pulcinella, the beak-nosed trickster from Naples, later became «Punch» of England's Punch-and-Judy puppet shows. «Lazzi» were rehearsed comic gags troupes could drop into any performance."
+},
+{
+  id:'brighella', name:'Brighella', role:'the crafty first zanni',
+  x:700, y:1000,
+  look:{ costume:'#e9e4d2', pattern:'stripes', hat:'beret', hatColor:'#3f5734', mask:'#6d7a45', prop:'mandolin', skin:'#e0a97e' },
+  pages:[
+    "Psst… over here. Brighella, at your service — innkeeper, schemer, fixer. For the right price I can arrange anything in this town… or ruin it. *strums mandolin innocently*",
+    "Arlecchino is the silly servant; I am the crafty one — the «first zanni» who drives the schemes. One look at my green-striped livery and olive mask and the audience knew: guard your purse.",
+    "And THAT is the beauty of our stock characters: the same beloved figures appear in every play, so any audience — in any city, speaking any language — knows us at a glance. Sound familiar? Your cartoons and sitcoms still use our trick!"
+  ],
+  quiz:{ q:"Why did commedia troupes reuse the same stock characters in every play?",
+    options:["The actors were too lazy to learn new parts","Audiences everywhere instantly recognized each character, even across languages","Masks were too expensive to replace"],
+    answer:1, explain:"Clever, clever. Instant recognition made improvised, touring theatre possible — and actors often played the same character their entire lives, perfecting it." },
+  journal:"Brighella is the cunning «first zanni» who drives the schemes. Commedia's reusable stock characters were instantly recognizable to any audience in any country — a trick modern cartoons and sitcoms still use."
+},
+{
+  id:'isabella', name:'Isabella', role:'an innamorata (young lover) & leading lady',
+  x:1200, y:560,
+  look:{ costume:'#8a4a6b', pattern:'gown', hat:'none', hatColor:'#fff', mask:null, prop:'flower', skin:'#e8b78a', hair:'#3a2a1a' },
+  pages:[
+    "Welcome to our stage! I am Isabella, one of the innamorati — the young lovers. Every plot begins with us: two sweethearts kept apart, while the masked fools spin chaos all around.",
+    "Notice — no mask! We lovers perform bare-faced and in the finest fashion of the day, for the audience must see every sigh and swoon. We speak beautifully while everyone else tumbles and squawks.",
+    "I carry a proud name. Isabella Andreini of the Gelosi troupe was a true star of the 1500s — actress, poet, celebrated genius. The commedia dell'arte was one of the first places in Europe where women performed professionally on stage, to continent-wide fame."
+  ],
+  quiz:{ q:"What was remarkable about women in the commedia dell'arte?",
+    options:["Women were not allowed to perform","Women only sewed the costumes","They were among Europe's first celebrated professional actresses — like the famous Isabella Andreini"],
+    answer:2, explain:"Yes! While English theatre still used boys for female roles, Italian troupes starred professional actresses — Isabella Andreini was famous across Europe as both performer and poet." },
+  journal:"The innamorati (young lovers) perform unmasked and drive every plot. Commedia troupes included some of Europe's first celebrated professional actresses, most famously Isabella Andreini of the Gelosi troupe (1562–1604)."
+},
+{
+  id:'fava', name:'Maestro Fava', role:'mascheraio — the mask maker',
+  x:440, y:590,
+  look:{ costume:'#8a6f4d', pattern:'apron2', hat:'none', hatColor:'#fff', mask:null, prop:'mask', skin:'#dda87c', hair:'#8f8676', beard:'#8f8676' },
+  pages:[
+    "Come in, come in! Maestro Fava, mascheraio — mask maker of this town. Every masked player you have met wears one of my children!",
+    "How is a true commedia mask born? Leather, soaked soft, is pressed and hammered over a carved wooden mold, then trimmed, oiled, and painted. A HALF-mask, mind you — the mouth stays free, for an actor must bellow, blabber, and sing!",
+    "A mask hides the face but reveals the character: Pantalone's greedy hooked nose, Arlecchino's cheeky snub, the Capitano's ferocious brow. The moment it's on, the actor's whole body must speak. Now — to the workbench! Let us make YOUR mask."
+  ],
+  quiz:null,
+  activity:'mask',
+  journal:"Traditional commedia masks are half-masks of leather, pressed over carved wooden molds, leaving the mouth free for speech and song. Each mask's shape instantly signals its character."
+}
+];
+
+// ---------------------------------------------------------------- world map
+const WORLD = { w:2500, h:1700 };
+
+const buildings = [
+  // {x,y,w,h, wall, roof, label, door:x-offset}
+  { x:250,  y:330, w:300, h:210, wall:'#dcc9a3', roof:'#a34a2f', label:"Mascheraio — Mask Workshop", sign:'🎭' },
+  { x:1830, y:470, w:300, h:230, wall:'#c9906b', roof:'#8a3b28', label:"Casa di Pantalone", sign:'💰' },
+  { x:250,  y:700, w:320, h:230, wall:'#e2d3ae', roof:'#976a35', label:"Locanda del Gallo — Inn", sign:'🍷' },
+  { x:1520, y:1120, w:170, h:140, wall:'#d8b98a', roof:'#7d5a34', label:"Market stall", stall:true },
+  { x:1720, y:1140, w:170, h:140, wall:'#c9a06b', roof:'#5a7d4a', label:"Market stall", stall:true },
+  { x:700,  y:1210, w:210, h:150, wall:'#cfc0a0', roof:'#6b6f8a', label:"Bookstalls of the Studium", stall:true },
+  { x:2280, y:820,  w:120, h:330, wall:'#b8a888', roof:'#8a7a5a', label:"City gate", gate:true },
+];
+
+const solids = []; // filled from buildings + props at init
+
+const trees = [ [180,1050],[640,420],[1770,380],[2050,1250],[1180,1420],[380,1440],[2230,600],[860,640],[1560,760] ];
+
+const stage  = { x:950, y:340, w:500, h:170 };  // theatre stage (north)
+const fountain = { x:1200, y:830, r:78 };
+const canal = { y: WORLD.h - 130 };
+
+// piazza paved area
+const piazza = { x:700, y:520, w:1050, h:640 };
+
+// ---------------------------------------------------------------- player
+const player = {
+  x:1150, y:1050, w:22, h:14, speed:230,
+  facing:1, moving:false, animT:0,
+  look:{ costume:'#4a6f8a', pattern:'none', hat:'beret', hatColor:'#7a4a2a', mask:null, prop:null, skin:'#e8b78a', hair:'#5a3a20' }
+};
+
+// ---------------------------------------------------------------- input
+const keys = {};
+let started = false;
+
+addEventListener('keydown', e => {
+  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
+  keys[e.key.toLowerCase()] = true;
+  if(!started) return;
+  if(e.key === 'j' || e.key === 'J'){ toggleJournal(); }
+  if(e.key === 'h' || e.key === 'H'){ openOverlay('ov-help'); }
+  if(e.key === 'Escape'){ document.querySelectorAll('.overlay.show').forEach(o=>{ if(o.id!=='ov-intro') o.classList.remove('show'); }); }
+  if((e.key==='e' || e.key==='E' || e.key===' ' || e.key==='Enter')){
+    if(dialogState.open){ advanceDialog(); }
+    else if(!anyOverlayOpen()){ tryInteract(); }
+  }
+});
+addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+
+function anyOverlayOpen(){ return !!document.querySelector('.overlay.show'); }
+
+// touch controls
+const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+if(isTouch) $('touch-ui').style.display = 'block';
+function bindHold(id, key){
+  const el = $(id);
+  const on = e => { e.preventDefault(); keys[key] = true; };
+  const off = e => { e.preventDefault(); keys[key] = false; };
+  el.addEventListener('pointerdown', on);
+  el.addEventListener('pointerup', off);
+  el.addEventListener('pointerleave', off);
+  el.addEventListener('pointercancel', off);
+}
+bindHold('d-up','w'); bindHold('d-down','s'); bindHold('d-left','a'); bindHold('d-right','d');
+$('act-btn').addEventListener('pointerdown', e => {
+  e.preventDefault();
+  if(dialogState.open){ advanceDialog(); } else if(!anyOverlayOpen()){ tryInteract(); }
+});
+
+// ---------------------------------------------------------------- canvas setup
+const cv = $('game'), ctx = cv.getContext('2d');
+function resize(){ cv.width = innerWidth * devicePixelRatio; cv.height = innerHeight * devicePixelRatio;
+  cv.style.width = innerWidth+'px'; cv.style.height = innerHeight+'px'; }
+addEventListener('resize', resize); resize();
+
+// cobblestone pattern for piazza
+const cobble = document.createElement('canvas'); cobble.width = 64; cobble.height = 64;
+{
+  const c = cobble.getContext('2d');
+  c.fillStyle = '#d3bd93'; c.fillRect(0,0,64,64);
+  c.strokeStyle = 'rgba(120,95,60,.35)'; c.lineWidth = 1.4;
+  for(let r=0;r<4;r++) for(let q=0;q<4;q++){
+    const off = (r%2)*8;
+    c.beginPath(); c.ellipse(q*16+8+off, r*16+8, 8.4, 6.6, 0, 0, TAU); c.stroke();
+  }
+}
+let cobblePat = null;
+
+// grass texture
+const grassC = document.createElement('canvas'); grassC.width = 96; grassC.height = 96;
+{
+  const c = grassC.getContext('2d');
+  c.fillStyle = '#93a862'; c.fillRect(0,0,96,96);
+  for(let i=0;i<130;i++){
+    c.fillStyle = Math.random()<.5 ? 'rgba(122,140,74,.5)' : 'rgba(160,178,106,.5)';
+    c.fillRect(Math.random()*96, Math.random()*96, 3, 3);
+  }
+}
+let grassPat = null;
+
+// ---------------------------------------------------------------- solids init
+function initSolids(){
+  for(const b of buildings) solids.push({x:b.x, y:b.y, w:b.w, h:b.h});
+  solids.push({x:stage.x, y:stage.y, w:stage.w, h:stage.h});
+  solids.push({x:fountain.x - fountain.r, y:fountain.y - fountain.r*0.72, w:fountain.r*2, h:fountain.r*1.44});
+  for(const [tx,ty] of trees) solids.push({x:tx-10, y:ty-8, w:20, h:12});
+  solids.push({x:0, y:canal.y, w:WORLD.w, h:WORLD.h - canal.y}); // canal
+}
+initSolids();
+
+function collides(px, py){
+  const r = {x:px - player.w/2, y:py - player.h/2, w:player.w, h:player.h};
+  for(const s of solids){
+    if(r.x < s.x + s.w && r.x + r.w > s.x && r.y < s.y + s.h && r.y + r.h > s.y) return true;
+  }
+  return false;
+}
+
+// ---------------------------------------------------------------- figure drawing
+/* Draws a commedia figure with feet at (0,0), about 56px tall, facing +1/-1.
+   step: walk-cycle phase (0 when idle). */
+function drawFigure(g, look, facing, step){
+  g.save();
+  g.scale(facing, 1);
+  const leg = Math.sin(step) * 5;
+
+  // shadow
+  g.save(); g.scale(1,0.35); g.fillStyle = 'rgba(0,0,0,.25)';
+  g.beginPath(); g.arc(0, 6, 13, 0, TAU); g.fill(); g.restore();
+
+  // cape (behind)
+  if(look.cape){
+    g.fillStyle = look.cape;
+    g.beginPath(); g.moveTo(-9,-36); g.quadraticCurveTo(-17,-18, -13,-4); g.lineTo(-4,-8); g.lineTo(-4,-34); g.closePath(); g.fill();
+  }
+  // legs
+  g.strokeStyle = look.pattern==='smock' ? '#e8e0c8' : shade(look.costume,-25);
+  g.lineWidth = 5; g.lineCap = 'round';
+  g.beginPath(); g.moveTo(-4,-16); g.lineTo(-4+leg*.6, -2); g.stroke();
+  g.beginPath(); g.moveTo(4,-16);  g.lineTo(4-leg*.6, -2); g.stroke();
+  // shoes
+  g.fillStyle = '#33241a';
+  g.fillRect(-8+leg*.6, -4, 9, 4); g.fillRect(1-leg*.6, -4, 9, 4);
+
+  // torso
+  const bw = look.belly ? 26 : (look.pattern==='smock' ? 24 : 19);
+  g.fillStyle = look.costume;
+  roundRect(g, -bw/2, -40, bw, 26, 6); g.fill();
+  if(look.hump){ g.beginPath(); g.arc(-bw/2+2, -34, 7, 0, TAU); g.fill(); }
+
+  // pattern
+  g.save();
+  roundRect(g, -bw/2, -40, bw, 26, 6); g.clip();
+  if(look.pattern === 'diamonds'){
+    const cols = ['#b23a2e','#3a6b4f','#3a4f8a'];
+    let k = 0;
+    for(let yy=-42; yy<-12; yy+=8) for(let xx=-14; xx<16; xx+=8){
+      g.fillStyle = cols[(k++)%3];
+      g.save(); g.translate(xx + ((yy/8)%2?4:0), yy); g.rotate(Math.PI/4); g.fillRect(-3.4,-3.4,6.8,6.8); g.restore();
+    }
+  } else if(look.pattern === 'stripes'){
+    g.fillStyle = '#3f5734';
+    for(let yy=-40; yy<-12; yy+=7) g.fillRect(-bw/2, yy, bw, 3);
+  } else if(look.pattern === 'buttons'){
+    g.fillStyle = '#e9c46a';
+    for(let yy=-36; yy<-18; yy+=6){ g.beginPath(); g.arc(0, yy, 1.7, 0, TAU); g.fill(); }
+  } else if(look.pattern === 'sash'){
+    g.fillStyle = '#c9a227'; g.save(); g.rotate(-.5); g.fillRect(-22,-26,44,6); g.restore();
+  } else if(look.pattern === 'apron'){
+    g.fillStyle = '#f4efe0'; roundRect(g, -7, -30, 14, 16, 3); g.fill();
+  } else if(look.pattern === 'apron2'){
+    g.fillStyle = '#5a4a34'; roundRect(g, -8, -32, 16, 18, 3); g.fill();
+  } else if(look.pattern === 'gown'){
+    g.fillStyle = shade(look.costume, 25);
+    g.beginPath(); g.moveTo(-bw/2,-14); g.quadraticCurveTo(0,-8,bw/2,-14); g.lineTo(bw/2,-20); g.lineTo(-bw/2,-20); g.closePath(); g.fill();
+  } else if(look.pattern === 'smock'){
+    g.fillStyle = 'rgba(0,0,0,.08)'; g.fillRect(-bw/2, -20, bw, 2);
+  }
+  g.restore();
+
+  // skirt for gown
+  if(look.pattern === 'gown'){
+    g.fillStyle = look.costume;
+    g.beginPath(); g.moveTo(-9,-18); g.quadraticCurveTo(-14,-4,-12,-1); g.lineTo(12,-1); g.quadraticCurveTo(14,-4,9,-18); g.closePath(); g.fill();
+  }
+
+  // collar (Dottore ruff)
+  if(look.collar){ g.fillStyle = look.collar; g.beginPath(); g.arc(0,-40,7,0,TAU); g.fill(); }
+
+  // arms
+  g.strokeStyle = shade(look.costume,-15); g.lineWidth = 4.5;
+  const arm = Math.sin(step + Math.PI) * 4;
+  g.beginPath(); g.moveTo(-bw/2+2,-34); g.lineTo(-bw/2-4+arm*.4,-22); g.stroke();
+  g.beginPath(); g.moveTo(bw/2-2,-34);  g.lineTo(bw/2+5,-24); g.stroke();
+  // hands
+  g.fillStyle = look.skin;
+  g.beginPath(); g.arc(-bw/2-4+arm*.4,-21,2.6,0,TAU); g.fill();
+  g.beginPath(); g.arc(bw/2+5,-23,2.6,0,TAU); g.fill();
+
+  // prop (in leading hand)
+  const hx = bw/2+5, hy = -23;
+  g.lineWidth = 3; g.lineCap = 'round';
+  switch(look.prop){
+    case 'slapstick': g.strokeStyle = '#7a5230'; g.beginPath(); g.moveTo(hx,hy); g.lineTo(hx+8,hy-16); g.stroke();
+      g.strokeStyle = '#5a3a20'; g.beginPath(); g.moveTo(hx+8,hy-16); g.lineTo(hx+10,hy-20); g.stroke(); break;
+    case 'sword': g.strokeStyle = '#aeb2b8'; g.beginPath(); g.moveTo(hx,hy); g.lineTo(hx+16,hy-12); g.stroke();
+      g.strokeStyle = '#c9a227'; g.beginPath(); g.moveTo(hx+3,hy-5); g.lineTo(hx+7,hy+1); g.stroke(); break;
+    case 'book': g.fillStyle = '#7a2f23'; g.fillRect(hx-2,hy-6,10,8); g.fillStyle = '#e9dcbb'; g.fillRect(hx-1,hy-5,8,6); break;
+    case 'purse': g.fillStyle = '#8a6f3a'; g.beginPath(); g.arc(hx+3,hy+3,4.4,0,TAU); g.fill();
+      g.fillStyle = '#c9a227'; g.fillRect(hx+1,hy-2,5,2); break;
+    case 'fan': g.fillStyle = '#e0b0c0'; g.beginPath(); g.moveTo(hx,hy); g.arc(hx,hy,10,-1.2,.3); g.closePath(); g.fill(); break;
+    case 'flower': g.strokeStyle = '#4f6b3a'; g.beginPath(); g.moveTo(hx,hy); g.lineTo(hx+5,hy-10); g.stroke();
+      g.fillStyle = '#c94a5a'; g.beginPath(); g.arc(hx+5,hy-11,3.4,0,TAU); g.fill(); break;
+    case 'ladle': g.strokeStyle = '#8a8a8a'; g.beginPath(); g.moveTo(hx,hy); g.lineTo(hx+8,hy-12); g.stroke();
+      g.fillStyle = '#8a8a8a'; g.beginPath(); g.arc(hx+9,hy-13,3.6,0,Math.PI); g.fill(); break;
+    case 'mandolin': g.fillStyle = '#a3703a'; g.beginPath(); g.ellipse(hx+4,hy+2,6,4.6,-.5,0,TAU); g.fill();
+      g.strokeStyle = '#5a3a20'; g.beginPath(); g.moveTo(hx+7,hy-1); g.lineTo(hx+14,hy-8); g.stroke(); break;
+    case 'mask': g.fillStyle = '#c9a227'; g.beginPath(); g.ellipse(hx+4,hy-2,4.6,5.6,0,0,TAU); g.fill();
+      g.fillStyle = '#3b2a1a'; g.beginPath(); g.arc(hx+3,hy-3,1.1,0,TAU); g.fill(); g.beginPath(); g.arc(hx+6,hy-3,1.1,0,TAU); g.fill(); break;
+  }
+
+  // head
+  g.fillStyle = look.skin;
+  g.beginPath(); g.arc(0,-47,8.5,0,TAU); g.fill();
+  // hair
+  if(look.hair){
+    g.fillStyle = look.hair;
+    g.beginPath(); g.arc(0,-49,8.6,Math.PI*1.05,Math.PI*1.95); g.fill();
+    if(look.pattern==='gown' || look.pattern==='apron'){ // long hair / bun
+      g.beginPath(); g.arc(-6,-44,3.4,0,TAU); g.fill();
+    }
+  }
+  // beard
+  if(look.beard){
+    g.fillStyle = look.beard;
+    g.beginPath(); g.moveTo(-6,-45); g.quadraticCurveTo(0,-34,6,-45); g.quadraticCurveTo(0,-41,-6,-45); g.fill();
+  }
+  // half-mask
+  if(look.mask){
+    g.fillStyle = look.mask;
+    g.beginPath();
+    g.moveTo(-8,-50); g.quadraticCurveTo(0,-54,8,-50);
+    g.quadraticCurveTo(9,-46,7,-44);
+    g.lineTo(4,-44); g.lineTo(5.5,-40); g.lineTo(2,-43.5);   // nose
+    g.quadraticCurveTo(-4,-45,-7,-44);
+    g.quadraticCurveTo(-9,-46,-8,-50); g.closePath(); g.fill();
+    g.fillStyle = '#f4e9d0';
+    g.beginPath(); g.arc(-3.4,-47.6,1.4,0,TAU); g.fill();
+    g.beginPath(); g.arc(3.4,-47.6,1.4,0,TAU); g.fill();
+  } else {
+    // face: eyes + smile
+    g.fillStyle = '#3b2a1a';
+    g.beginPath(); g.arc(-3,-48,1.1,0,TAU); g.fill();
+    g.beginPath(); g.arc(3,-48,1.1,0,TAU); g.fill();
+    g.strokeStyle = '#3b2a1a'; g.lineWidth = 1.1;
+    g.beginPath(); g.arc(0,-45,3,0.25,Math.PI-.25); g.stroke();
+  }
+  if(look.mustache){
+    g.strokeStyle = '#2b2118'; g.lineWidth = 1.6;
+    g.beginPath(); g.moveTo(-1,-44); g.quadraticCurveTo(-5,-45,-7,-42); g.stroke();
+    g.beginPath(); g.moveTo(1,-44);  g.quadraticCurveTo(5,-45,7,-42); g.stroke();
+  }
+
+  // hat
+  g.fillStyle = look.hatColor;
+  switch(look.hat){
+    case 'beret': g.beginPath(); g.ellipse(0,-55,9.5,4,0,0,TAU); g.fill();
+      g.beginPath(); g.arc(6,-58,2,0,TAU); g.fill(); break;
+    case 'skullcap': g.beginPath(); g.arc(0,-52,8,Math.PI,0); g.fill(); break;
+    case 'wide': g.beginPath(); g.ellipse(0,-54,13,3.4,0,0,TAU); g.fill();
+      g.beginPath(); g.arc(0,-56,6,Math.PI,0); g.fill(); break;
+    case 'plume': g.beginPath(); g.ellipse(0,-54,11,3,0,0,TAU); g.fill();
+      g.beginPath(); g.arc(0,-57,6.5,Math.PI,0); g.fill();
+      g.strokeStyle = '#c94a5a'; g.lineWidth = 2.4;
+      g.beginPath(); g.moveTo(4,-58); g.quadraticCurveTo(12,-70,18,-66); g.stroke(); break;
+    case 'sugarloaf': g.beginPath(); g.moveTo(-6,-53); g.lineTo(0,-70); g.lineTo(6,-53); g.closePath(); g.fill();
+      g.strokeStyle = shade(look.hatColor,-20); g.lineWidth = 1; g.stroke(); break;
+  }
+  g.restore();
+}
+
+function roundRect(g,x,y,w,h,r){
+  g.beginPath();
+  g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r);
+  g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath();
+}
+function shade(hex, amt){
+  const n = parseInt(hex.slice(1),16);
+  let r=(n>>16)+amt, g=((n>>8)&255)+amt, b=(n&255)+amt;
+  r=clamp(r,0,255); g=clamp(g,0,255); b=clamp(b,0,255);
+  return `#${((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1)}`;
+}
+
+// ---------------------------------------------------------------- world drawing
+function drawWorld(t){
+  const scale = devicePixelRatio;
+  const vw = innerWidth, vh = innerHeight;
+  let camX = clamp(player.x - vw/2, 0, Math.max(0, WORLD.w - vw));
+  let camY = clamp(player.y - vh/2, 0, Math.max(0, WORLD.h - vh));
+  if(WORLD.w < vw) camX = (WORLD.w - vw)/2;
+  if(WORLD.h < vh) camY = (WORLD.h - vh)/2;
+
+  ctx.setTransform(scale,0,0,scale,0,0);
+  // grass base
+  grassPat = grassPat || ctx.createPattern(grassC,'repeat');
+  ctx.save(); ctx.translate(-camX,-camY);
+  ctx.fillStyle = grassPat; ctx.fillRect(camX-100,camY-100,vw+200,vh+200);
+  ctx.fillStyle = grassPat; ctx.fillRect(0,0,WORLD.w,WORLD.h);
+
+  // dirt roads
+  ctx.fillStyle = '#c8ad7e';
+  ctx.fillRect(0, 880, WORLD.w, 90);            // east-west road
+  ctx.fillRect(1180, 0, 90, WORLD.h - 130);     // north-south road
+
+  // piazza cobblestone
+  cobblePat = cobblePat || ctx.createPattern(cobble,'repeat');
+  ctx.fillStyle = cobblePat;
+  roundRect(ctx, piazza.x, piazza.y, piazza.w, piazza.h, 60); ctx.fill();
+  ctx.strokeStyle = 'rgba(90,70,40,.4)'; ctx.lineWidth = 4;
+  roundRect(ctx, piazza.x, piazza.y, piazza.w, piazza.h, 60); ctx.stroke();
+
+  // canal
+  ctx.fillStyle = '#4f7d8f'; ctx.fillRect(0, canal.y, WORLD.w, WORLD.h - canal.y);
+  ctx.fillStyle = 'rgba(255,255,255,.13)';
+  for(let i=0;i<14;i++){
+    const wx = (i*197 + t*30) % WORLD.w;
+    ctx.fillRect(wx, canal.y + 24 + (i%3)*28, 70, 3);
+  }
+  ctx.fillStyle = '#b8a070'; ctx.fillRect(0, canal.y-10, WORLD.w, 10); // embankment
+  // gondola
+  const gx = (t*36) % (WORLD.w+300) - 150;
+  ctx.save(); ctx.translate(gx, canal.y+58);
+  ctx.fillStyle = '#2b2118';
+  ctx.beginPath(); ctx.moveTo(-45,0); ctx.quadraticCurveTo(0,14,45,0); ctx.quadraticCurveTo(52,-8,58,-12); ctx.lineTo(45,-2);
+  ctx.lineTo(-45,-2); ctx.lineTo(-58,-12); ctx.quadraticCurveTo(-52,-8,-45,0); ctx.fill();
+  ctx.strokeStyle = '#4a3421'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(10,-4); ctx.lineTo(24,-34); ctx.stroke();
+  ctx.restore();
+
+  // theatre stage
+  ctx.fillStyle = '#8a6a42'; ctx.fillRect(stage.x, stage.y, stage.w, stage.h);
+  ctx.fillStyle = '#a3814f'; ctx.fillRect(stage.x, stage.y + stage.h - 22, stage.w, 22);
+  ctx.strokeStyle = '#5a4228'; ctx.lineWidth = 3; ctx.strokeRect(stage.x, stage.y, stage.w, stage.h);
+  for(let i=1;i<6;i++){ ctx.beginPath(); ctx.moveTo(stage.x + i*stage.w/6, stage.y); ctx.lineTo(stage.x + i*stage.w/6, stage.y+stage.h-22); ctx.strokeStyle='rgba(90,66,40,.35)'; ctx.stroke(); }
+  // backdrop + curtains
+  ctx.fillStyle = '#6b3a4a'; ctx.fillRect(stage.x, stage.y - 64, stage.w, 64);
+  ctx.fillStyle = '#8a2f3a';
+  for(let i=0;i<10;i++) ctx.fillRect(stage.x + i*stage.w/10 + 4, stage.y - 64, stage.w/20, 64);
+  ctx.fillStyle = '#c9a227'; ctx.fillRect(stage.x, stage.y - 70, stage.w, 8);
+  ctx.font = 'bold 22px Georgia'; ctx.fillStyle = '#f4e9d0'; ctx.textAlign = 'center';
+  ctx.fillText('TEATRO', stage.x + stage.w/2, stage.y - 22);
+  // stage banner
+  ctx.font = '13px Georgia'; ctx.fillStyle = '#ffd76e';
+  ctx.fillText('~ La Compagnia della Piazza ~', stage.x + stage.w/2, stage.y - 4);
+
+  // fountain
+  ctx.save(); ctx.translate(fountain.x, fountain.y);
+  ctx.fillStyle = '#b8b0a0'; ctx.beginPath(); ctx.ellipse(0,0,fountain.r,fountain.r*.72,0,0,TAU); ctx.fill();
+  ctx.fillStyle = '#5f8fa3'; ctx.beginPath(); ctx.ellipse(0,0,fountain.r-12,fountain.r*.72-10,0,0,TAU); ctx.fill();
+  ctx.fillStyle = '#b8b0a0'; ctx.beginPath(); ctx.ellipse(0,-6,20,13,0,0,TAU); ctx.fill();
+  ctx.fillStyle = '#9a9284'; ctx.fillRect(-5,-38,10,32);
+  ctx.fillStyle = '#5f8fa3'; ctx.beginPath(); ctx.ellipse(0,-38,14,6,0,0,TAU); ctx.fill();
+  // spray
+  ctx.strokeStyle = 'rgba(220,240,250,.8)'; ctx.lineWidth = 2;
+  for(let i=0;i<5;i++){
+    const a = -Math.PI/2 + (i-2)*.3, ph = (t*2 + i)%1;
+    ctx.globalAlpha = 1-ph;
+    ctx.beginPath(); ctx.arc(Math.cos(a)*18*ph, -38 + Math.sin(a)*10*ph + ph*ph*26, 1.6, 0, TAU); ctx.stroke();
+  }
+  ctx.globalAlpha = 1; ctx.restore();
+
+  // buildings
+  for(const b of buildings) drawBuilding(b, t);
+
+  // market bunting between stalls
+  ctx.strokeStyle = '#8a6f4d'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(1605,1120); ctx.quadraticCurveTo(1690,1160,1805,1140); ctx.stroke();
+  const flagCols = ['#c94a5a','#e9c46a','#4f6b3a','#3f5c8a'];
+  for(let i=0;i<8;i++){
+    const fx = 1605 + i*25, fy = 1128 + Math.sin(i/7*Math.PI)*26;
+    ctx.fillStyle = flagCols[i%4];
+    ctx.beginPath(); ctx.moveTo(fx,fy); ctx.lineTo(fx+10,fy); ctx.lineTo(fx+5,fy+10); ctx.closePath(); ctx.fill();
+  }
+
+  // entity list (characters + player + trees), y-sorted
+  const ents = [];
+  for(const c of CHARACTERS) ents.push({y:c.y, draw:()=>drawNPC(c,t)});
+  ents.push({y:player.y, draw:()=>{
+    ctx.save(); ctx.translate(player.x, player.y);
+    drawFigure(ctx, player.look, player.facing, player.moving ? player.animT*10 : 0);
+    ctx.restore();
+  }});
+  for(const [tx,ty] of trees) ents.push({y:ty, draw:()=>drawTree(tx,ty)});
+  ents.sort((a,b)=>a.y-b.y);
+  for(const e of ents) e.draw();
+
+  ctx.restore();
+}
+
+function drawBuilding(b, t){
+  ctx.save();
+  if(b.gate){
+    ctx.fillStyle = b.wall; ctx.fillRect(b.x, b.y, b.w, b.h);
+    ctx.fillStyle = '#8a7a5a';
+    ctx.fillRect(b.x-8, b.y-14, b.w+16, 20);
+    ctx.fillStyle = '#6b5b3f';
+    for(let i=0;i<5;i++) ctx.fillRect(b.x-8 + i*(b.w+16)/5 + 4, b.y-26, 14, 14); // crenellations
+    ctx.fillStyle = '#3b2a1a';
+    ctx.beginPath(); ctx.arc(b.x + b.w/2, b.y + b.h - 60, 42, Math.PI, 0); ctx.fill();
+    ctx.fillRect(b.x + b.w/2 - 42, b.y + b.h - 60, 84, 60);
+    ctx.restore(); return;
+  }
+  const roofH = b.stall ? 26 : 44;
+  // wall
+  ctx.fillStyle = b.wall; ctx.fillRect(b.x, b.y, b.w, b.h);
+  ctx.strokeStyle = 'rgba(60,44,26,.5)'; ctx.lineWidth = 2.5; ctx.strokeRect(b.x, b.y, b.w, b.h);
+  // roof
+  ctx.fillStyle = b.roof;
+  ctx.beginPath(); ctx.moveTo(b.x-12, b.y); ctx.lineTo(b.x + b.w/2, b.y - roofH); ctx.lineTo(b.x + b.w + 12, b.y); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(0,0,0,.25)';
+  for(let i=1;i<5;i++){
+    ctx.beginPath(); ctx.moveTo(b.x - 12 + i*(b.w+24)/5, b.y);
+    ctx.lineTo(b.x + b.w/2 + (i-2.5)*(b.w+24)/10, b.y - roofH*.72); ctx.stroke();
+  }
+  if(b.stall){
+    // open stall: awning + goods
+    ctx.fillStyle = 'rgba(59,42,26,.25)'; ctx.fillRect(b.x+8, b.y+8, b.w-16, b.h-16);
+    ctx.fillStyle = '#e9c46a';
+    for(let i=0;i<4;i++){ ctx.beginPath(); ctx.arc(b.x+26+i*((b.w-52)/3), b.y+b.h-26, 8, 0, TAU); ctx.fill(); }
+  } else {
+    // door
+    ctx.fillStyle = '#5a3a20';
+    const dw=34, dh=52;
+    ctx.beginPath(); ctx.arc(b.x + b.w/2, b.y + b.h - dh + dw/2 - 16, dw/2, Math.PI, 0); ctx.fill();
+    ctx.fillRect(b.x + b.w/2 - dw/2, b.y + b.h - dh + dw/2 - 16, dw, dh - dw/2 + 16);
+    // windows
+    ctx.fillStyle = '#7d94a3';
+    const wy = b.y + 26;
+    for(const wx of [b.x + 34, b.x + b.w - 58]){
+      ctx.fillRect(wx, wy, 26, 32);
+      ctx.strokeStyle = '#5a4228'; ctx.lineWidth = 2; ctx.strokeRect(wx, wy, 26, 32);
+      ctx.beginPath(); ctx.moveTo(wx+13,wy); ctx.lineTo(wx+13,wy+32); ctx.stroke();
+      // shutters
+      ctx.fillStyle = '#4f6b3a'; ctx.fillRect(wx-8,wy,7,32); ctx.fillRect(wx+27,wy,7,32);
+      ctx.fillStyle = '#7d94a3';
+    }
+  }
+  // sign
+  if(b.sign){
+    ctx.font = '20px serif'; ctx.textAlign='center';
+    ctx.fillStyle = '#f4e9d0';
+    roundRect(ctx, b.x + b.w/2 - 16, b.y + 4, 32, 30, 6); ctx.fill();
+    ctx.strokeStyle = '#5a4228'; ctx.stroke();
+    ctx.fillText(b.sign, b.x + b.w/2, b.y + 27);
+  }
+  // label
+  ctx.font = 'bold 12px Georgia'; ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(59,42,26,.85)';
+  ctx.fillText(b.label, b.x + b.w/2, b.y + b.h + 16);
+  ctx.restore();
+}
+
+function drawTree(x, y){
+  ctx.save(); ctx.translate(x, y);
+  ctx.save(); ctx.scale(1,.35); ctx.fillStyle='rgba(0,0,0,.22)';
+  ctx.beginPath(); ctx.arc(0,4,14,0,TAU); ctx.fill(); ctx.restore();
+  ctx.fillStyle = '#6b4a2e'; ctx.fillRect(-4,-16,8,16);
+  ctx.fillStyle = '#3f5734';
+  ctx.beginPath(); ctx.moveTo(-15,-12); ctx.quadraticCurveTo(0,-95,15,-12); ctx.closePath(); ctx.fill(); // cypress
+  ctx.fillStyle = 'rgba(255,255,255,.08)';
+  ctx.beginPath(); ctx.moveTo(-6,-20); ctx.quadraticCurveTo(-2,-80,4,-24); ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+function drawNPC(c, t){
+  ctx.save(); ctx.translate(c.x, c.y);
+  const idle = Math.sin(t*2 + c.x) * .5;
+  ctx.translate(0, idle);
+  drawFigure(ctx, c.look, (player.x < c.x) ? -1 : 1, 0);
+  // name / marker
+  ctx.textAlign = 'center';
+  const fullyDone = isCharFullyDone(c);
+  if(!fullyDone){
+    ctx.font = 'bold 20px Georgia';
+    ctx.fillStyle = '#c9a227';
+    ctx.strokeStyle = '#3b2a1a'; ctx.lineWidth = 3;
+    const by = -78 + Math.sin(t*4)*3;
+    ctx.strokeText('❗', 0, by); ctx.fillText('❗', 0, by);
+  } else {
+    ctx.font = '15px Georgia';
+    ctx.fillText('✔', 8, -72);
+  }
+  const near = dist(player, c) < 90;
+  if(near){
+    ctx.font = 'bold 13px Georgia';
+    ctx.fillStyle = 'rgba(244,233,208,.95)';
+    const tw = ctx.measureText(c.name).width + 14;
+    roundRect(ctx, -tw/2, -70, tw, 18, 6); ctx.fill();
+    ctx.fillStyle = '#3b2a1a'; ctx.fillText(c.name, 0, -57);
+  }
+  ctx.restore();
+}
+
+function isCharFullyDone(c){
+  if(c.quiz && !progress.done[c.id]) return false;
+  if(c.activity && !progress.done[c.activity]) return false;
+  return true;
+}
+
+function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
+
+// ---------------------------------------------------------------- interaction
+function nearestCharacter(){
+  let best = null, bd = 90;
+  for(const c of CHARACTERS){ const d = dist(player, c); if(d < bd){ bd = d; best = c; } }
+  return best;
+}
+
+function tryInteract(){
+  const c = nearestCharacter();
+  if(c) startDialog(c);
+}
+
+// ---------------------------------------------------------------- dialogue
+const dialogState = { open:false, char:null, page:0, mode:'talk' };
+
+function startDialog(c){
+  dialogState.open = true; dialogState.char = c; dialogState.page = 0; dialogState.mode = 'talk';
+  $('dialog').style.display = 'block';
+  $('dl-name').textContent = c.name;
+  $('dl-role').textContent = c.role;
+  drawPortrait(c);
+  sfx('talk');
+  renderDialogPage();
+}
+
+function drawPortrait(c){
+  const pc = $('dl-portrait'), g = pc.getContext('2d');
+  g.setTransform(1,0,0,1,0,0);
+  g.clearRect(0,0,pc.width,pc.height);
+  g.fillStyle = '#eaddc0'; g.fillRect(0,0,pc.width,pc.height);
+  g.fillStyle = '#d8c49a'; g.fillRect(0,pc.height-24,pc.width,24);
+  g.translate(pc.width/2, pc.height-14);
+  g.scale(2.05,2.05);
+  drawFigure(g, c.look, 1, 0);
+}
+
+function renderDialogPage(){
+  const c = dialogState.char;
+  const btns = $('dl-buttons'); btns.innerHTML = '';
+  $('dl-quiz').innerHTML = '';
+
+  if(dialogState.mode === 'talk'){
+    $('dl-text').textContent = c.pages[dialogState.page];
+    const last = dialogState.page >= c.pages.length - 1;
+    const nxt = mkBtn(last ? (c.quiz ? 'To the question! →' : 'Continue →') : 'Next →', 'btn');
+    nxt.onclick = advanceDialog;
+    btns.appendChild(nxt);
+    const bye = mkBtn('Walk away', 'btn quiet'); bye.onclick = endDialog;
+    btns.appendChild(bye);
+  }
+  else if(dialogState.mode === 'quiz'){
+    $('dl-text').innerHTML = '<b>' + c.quiz.q + '</b>';
+    c.quiz.options.forEach((opt, i) => {
+      const b = document.createElement('button');
+      b.className = 'quiz-opt'; b.textContent = String.fromCharCode(65+i) + ') ' + opt;
+      b.onclick = () => answerQuiz(i, b);
+      $('dl-quiz').appendChild(b);
+    });
+  }
+  else if(dialogState.mode === 'after'){
+    let txt = progress.done[c.id] || !c.quiz ? '' : '';
+    if(c.activity === 'juggle' && !progress.done.juggle){
+      $('dl-text').textContent = "Now — catch! Let's see those hands. Juggling time!";
+      const b = mkBtn('🤹 Learn to juggle!', 'btn alt'); b.onclick = ()=>{ endDialog(); openJuggle(); }; $('dl-buttons').appendChild(b);
+    } else if(c.activity === 'lazzi' && !progress.done.lazzi){
+      $('dl-text').textContent = "Watch closely — the Lazzo of the Fly! Then you do it, exactly as I do!";
+      const b = mkBtn('🪰 Learn the lazzo!', 'btn alt'); b.onclick = ()=>{ endDialog(); openLazzi(); }; $('dl-buttons').appendChild(b);
+    } else if(c.activity === 'mask' && !progress.done.mask){
+      $('dl-text').textContent = "To the workbench! Leather and paint await. Let us make your mask!";
+      const b = mkBtn('🎭 Make my mask!', 'btn alt'); b.onclick = ()=>{ endDialog(); openMask(); }; $('dl-buttons').appendChild(b);
+    } else {
+      $('dl-text').textContent = randomFarewell(c);
+    }
+    const bye = mkBtn('Goodbye', 'btn quiet'); bye.onclick = endDialog; $('dl-buttons').appendChild(bye);
+  }
+}
+
+function randomFarewell(c){
+  const f = {
+    arlecchino:"Off you go! And remember: when in doubt — cartwheel!",
+    colombina:"Off with you — and stay cleverer than the men in masks.",
+    pantalone:"Go, go! Time is money, and you're spending mine.",
+    dottore:"As Aristotle said… er… «go-eth thou hence-ly». Probably.",
+    capitano:"Onward! Tell them Il Capitano sent you. They will tremble. Probably.",
+    pulcinella:"Go, go! And if you find macaroni… you know where I live.",
+    brighella:"We never spoke. *strum* …But do come back if you need anything arranged.",
+    isabella:"Farewell, friend of the theatre. May your heart stay unmasked.",
+    fava:"A pleasure. Wear your mask proudly — and let it change how you walk!"
+  };
+  return f[c.id] || 'Arrivederci!';
+}
+
+function mkBtn(txt, cls){ const b = document.createElement('button'); b.className = cls; b.textContent = txt; return b; }
+
+function advanceDialog(){
+  const c = dialogState.char;
+  if(!dialogState.open) return;
+  if(dialogState.mode === 'talk'){
+    if(dialogState.page < c.pages.length - 1){ dialogState.page++; renderDialogPage(); }
+    else if(c.quiz && !progress.done[c.id]){ dialogState.mode = 'quiz'; renderDialogPage(); }
+    else { dialogState.mode = 'after'; renderDialogPage(); }
+  }
+  // quiz mode advances via option clicks
+}
+
+function answerQuiz(i, btnEl){
+  const c = dialogState.char;
+  const opts = $('dl-quiz').querySelectorAll('.quiz-opt');
+  if(i === c.quiz.answer){
+    opts.forEach(o=>o.disabled = true);
+    btnEl.classList.add('right');
+    sfx('good');
+    $('dl-text').innerHTML = '✅ ' + c.quiz.explain;
+    awardStamp(c.id, c.name + "'s mask");
+    const b = mkBtn('Continue →','btn'); b.onclick = ()=>{ dialogState.mode='after'; renderDialogPage(); };
+    $('dl-buttons').innerHTML = ''; $('dl-buttons').appendChild(b);
+  } else {
+    btnEl.classList.add('wrong'); btnEl.disabled = true;
+    sfx('bad');
+    $('dl-text').innerHTML = '❌ Not quite — think about what ' + c.name + ' told you, and try again!';
+  }
+}
+
+function endDialog(){
+  dialogState.open = false;
+  $('dialog').style.display = 'none';
+}
+
+// ---------------------------------------------------------------- journal
+function toggleJournal(){
+  const list = $('journal-list');
+  const entries = CHARACTERS.filter(c => progress.done[c.id] || (c.activity && progress.done[c.activity]));
+  if(entries.length === 0){
+    list.innerHTML = '<p class="small">You haven\'t learned anything yet. Go talk to the performers!</p>';
+  } else {
+    list.innerHTML = entries.map(c =>
+      `<div class="journal-entry"><b>${c.name}</b> — <i>${c.role}</i><p>${c.journal}</p></div>`).join('') +
+      `<div class="journal-entry"><b>The big picture</b><p>Commedia dell'arte flourished in Italy from the mid-1500s to the 1700s: professional touring troupes, masked stock characters, improvised dialogue from scenario outlines (canovacci), and rehearsed gags (lazzi). Its DNA lives on in Punch and Judy, pantomime, clowning, Molière — and the stock characters of today's sitcoms and cartoons.</p></div>`;
+  }
+  const ov = $('ov-journal');
+  ov.classList.toggle('show');
+}
+$('hud-journal').onclick = toggleJournal;
+$('hud-help').onclick = ()=>openOverlay('ov-help');
+
+// ---------------------------------------------------------------- juggling game
+const jug = { running:false, balls:[], score:0, lives:3, t:0, raf:null };
+const JC = $('jug-canvas'), jg = JC.getContext('2d');
+const JUG_TARGET = 12, CATCH_Y = 330;
+const laneX = i => 90 + i*150;
+const BALL_COLS = ['#c94a5a','#e9c46a','#4f8a6b'];
+
+function openJuggle(){
+  openOverlay('ov-juggle');
+  jugReset();
+  drawJugFrame(0);
+}
+function jugReset(){
+  jug.running = false; jug.balls = []; jug.score = 0; jug.lives = 3; jug.t = 0;
+  $('jug-status').textContent = progress.done.juggle ? 'You already earned this stamp — but juggling is always fun!' : 'Press Start. A-S-D or tap to catch!';
+}
+$('jug-start').onclick = () => {
+  jugReset();
+  jug.running = true;
+  jugAddBall(1);
+  $('jug-status').textContent = `Catches: 0 / ${JUG_TARGET}  ·  ❤❤❤`;
+  if(!jug.raf) jugLoop(performance.now());
+};
+$('jug-quit').onclick = () => { jug.running = false; closeOverlay('ov-juggle'); };
+
+function jugAddBall(lane){
+  jug.balls.push({ lane, y:CATCH_Y, vy:-(520 + Math.random()*100), dead:false, deadT:0 });
+}
+function jugToss(b){ b.y = Math.min(b.y, CATCH_Y); b.vy = -(500 + Math.random()*140); }
+
+function jugCatch(lane){
+  if(!jug.running) return;
+  const b = jug.balls.find(b => b.lane === lane && !b.dead && b.vy > 0 && b.y > CATCH_Y - 80);
+  if(b){
+    jug.score++; sfx('catch');
+    jugToss(b);
+    if(jug.score === 3 && jug.balls.length === 1) jugAddBall(0);
+    if(jug.score === 7 && jug.balls.length === 2) jugAddBall(2);
+    if(jug.score >= JUG_TARGET){
+      jug.running = false;
+      $('jug-status').textContent = '🎉 Twelve catches! Arlecchino bows to you!';
+      awardStamp('juggle', 'Juggler of the troupe');
+      return;
+    }
+    jugStatus();
+  }
+}
+function jugStatus(){
+  $('jug-status').textContent = `Catches: ${jug.score} / ${JUG_TARGET}  ·  ${'❤'.repeat(jug.lives)}${'♡'.repeat(3-jug.lives)}`;
+}
+
+addEventListener('keydown', e => {
+  if(!$('ov-juggle').classList.contains('show')) return;
+  const map = { a:0, s:1, d:2 };
+  const k = e.key.toLowerCase();
+  if(k in map){ e.preventDefault(); jugCatch(map[k]); }
+});
+JC.addEventListener('pointerdown', e => {
+  const r = JC.getBoundingClientRect();
+  const x = (e.clientX - r.left) * (JC.width / r.width);
+  jugCatch(x < 165 ? 0 : x < 315 ? 1 : 2);
+});
+
+function jugLoop(now){
+  jug.raf = requestAnimationFrame(jugLoop);
+  const dt = Math.min(.033, (now - (jug.last||now))/1000); jug.last = now;
+  jug.t += dt;
+  if(jug.running){
+    for(const b of jug.balls){
+      if(b.dead){ b.deadT -= dt; if(b.deadT <= 0){ b.dead=false; jugToss(b); } continue; }
+      b.vy += 620 * dt; b.y += b.vy * dt;
+      if(b.y > CATCH_Y + 55){
+        b.dead = true; b.deadT = 1.1; b.y = CATCH_Y + 55;
+        jug.lives--; sfx('drop');
+        if(jug.lives <= 0){
+          jug.running = false;
+          $('jug-status').textContent = '💥 Three drops! "Even I dropped a few at first," laughs Arlecchino. Try again!';
+        } else jugStatus();
+      }
+    }
+  }
+  drawJugFrame(jug.t);
+  if(!$('ov-juggle').classList.contains('show')){ cancelAnimationFrame(jug.raf); jug.raf = null; }
+}
+
+function drawJugFrame(t){
+  jg.setTransform(1,0,0,1,0,0);
+  jg.clearRect(0,0,JC.width,JC.height);
+  // backdrop
+  jg.fillStyle = '#e9dcbb'; jg.fillRect(0,0,JC.width,JC.height);
+  jg.fillStyle = '#d3bd93'; jg.fillRect(0,CATCH_Y+60,JC.width,JC.height);
+  // catch zone
+  jg.fillStyle = 'rgba(201,162,39,.28)';
+  jg.fillRect(0, CATCH_Y-80, JC.width, 135);
+  jg.strokeStyle = '#c9a227'; jg.lineWidth = 2; jg.setLineDash([8,6]);
+  jg.beginPath(); jg.moveTo(0,CATCH_Y-80); jg.lineTo(JC.width,CATCH_Y-80); jg.stroke();
+  jg.setLineDash([]);
+  jg.font = 'bold 12px Georgia'; jg.fillStyle = 'rgba(90,66,40,.8)'; jg.textAlign='left';
+  jg.fillText('CATCH ZONE', 8, CATCH_Y-66);
+  // lane keys
+  jg.textAlign = 'center'; jg.font = 'bold 22px Georgia';
+  ['A','S','D'].forEach((k,i)=>{
+    jg.fillStyle = 'rgba(59,42,26,.16)';
+    jg.beginPath(); jg.arc(laneX(i), CATCH_Y+18, 20, 0, TAU); jg.fill();
+    jg.fillStyle = '#5a4228'; jg.fillText(k, laneX(i), CATCH_Y+26);
+  });
+  // Arlecchino figure at bottom center
+  jg.save(); jg.translate(240, JC.height-6); jg.scale(1.35,1.35);
+  drawFigure(jg, CHARACTERS[0].look, 1, Math.sin(t*6)*(jug.running?1:0));
+  jg.restore();
+  // balls
+  for(const b of jug.balls){
+    jg.save(); jg.translate(laneX(b.lane), b.y);
+    if(b.dead){ jg.globalAlpha = .5; jg.font='20px serif'; jg.fillText('💥', 0, 6); }
+    else{
+      jg.fillStyle = BALL_COLS[b.lane];
+      jg.beginPath(); jg.arc(0,0,13,0,TAU); jg.fill();
+      jg.strokeStyle = 'rgba(0,0,0,.35)'; jg.stroke();
+      jg.fillStyle = 'rgba(255,255,255,.5)';
+      jg.beginPath(); jg.arc(-4,-4,4,0,TAU); jg.fill();
+    }
+    jg.restore();
+  }
+}
+
+// ---------------------------------------------------------------- lazzi game
+const MOVES = [
+  { id:'bow',   em:'🙇', label:'Grand Bow' },
+  { id:'swat',  em:'🪰', label:'Swat the Fly' },
+  { id:'trip',  em:'🤸', label:'Tumble' },
+  { id:'faint', em:'😵', label:'Dramatic Faint' },
+  { id:'sneak', em:'🤫', label:'Tip-toe Sneak' },
+];
+const lazzi = { seq:[], input:0, round:0, busy:false, awaiting:false };
+
+function openLazzi(){
+  openOverlay('ov-lazzi');
+  const stage = $('lazzi-stage'); stage.innerHTML = '';
+  MOVES.forEach((m,i)=>{
+    const d = document.createElement('div');
+    d.className = 'lazzi-move'; d.dataset.i = i;
+    d.innerHTML = `<span class="em">${m.em}</span>${m.label}`;
+    d.onclick = ()=>lazziPress(i, d);
+    stage.appendChild(d);
+  });
+  lazzi.round = 0; lazzi.busy = false; lazzi.awaiting = false;
+  $('lazzi-status').textContent = progress.done.lazzi ? 'Stamp already earned — but encore! Press Watch.' : 'Press "Watch the Routine" to begin.';
+}
+$('lazzi-quit').onclick = ()=>closeOverlay('ov-lazzi');
+$('lazzi-start').onclick = ()=>{ if(!lazzi.busy) lazziRound(lazzi.round); };
+
+function lazziRound(r){
+  const len = 3 + r;
+  lazzi.seq = Array.from({length:len}, ()=>Math.floor(Math.random()*MOVES.length));
+  lazzi.input = 0; lazzi.busy = true; lazzi.awaiting = false;
+  $('lazzi-start').style.display = 'none';
+  $('lazzi-status').textContent = `Round ${r+1} of 3 — watch Pulcinella! 👀`;
+  const tiles = [...document.querySelectorAll('.lazzi-move')];
+  let i = 0;
+  const step = ()=>{
+    tiles.forEach(t=>t.classList.remove('lit'));
+    if(i >= lazzi.seq.length){
+      lazzi.busy = false; lazzi.awaiting = true;
+      $('lazzi-status').textContent = 'Your turn! Repeat the routine in order.';
+      return;
+    }
+    const t = tiles[lazzi.seq[i]];
+    t.classList.add('lit'); sfx('talk');
+    setTimeout(()=>{ t.classList.remove('lit'); i++; setTimeout(step, 220); }, 620);
+  };
+  setTimeout(step, 700);
+}
+
+function lazziPress(i, el){
+  if(!lazzi.awaiting) return;
+  if(i === lazzi.seq[lazzi.input]){
+    el.classList.add('good'); sfx('catch');
+    setTimeout(()=>el.classList.remove('good'), 280);
+    lazzi.input++;
+    if(lazzi.input >= lazzi.seq.length){
+      lazzi.awaiting = false;
+      lazzi.round++;
+      if(lazzi.round >= 3){
+        $('lazzi-status').textContent = '🎉 Perfetto! You performed the Lazzo of the Fly!';
+        awardStamp('lazzi', 'Lazzo performer');
+        $('lazzi-start').textContent = 'Encore?'; $('lazzi-start').style.display = '';
+        lazzi.round = 0;
+      } else {
+        $('lazzi-status').textContent = `Bravo! Round ${lazzi.round} done — the next is longer…`;
+        setTimeout(()=>lazziRound(lazzi.round), 1100);
+      }
+    }
+  } else {
+    el.classList.add('bad'); sfx('bad');
+    setTimeout(()=>el.classList.remove('bad'), 350);
+    lazzi.awaiting = false;
+    $('lazzi-status').textContent = '"No no no!" squawks Pulcinella. Watch once more…';
+    setTimeout(()=>lazziRound(lazzi.round), 1200);
+  }
+}
+
+// ---------------------------------------------------------------- mask maker
+const maskOpts = {
+  base:'half', color:'#c9a227', pattern:'none', eyes:'round', nose:'snub', trim:'gold', feather:'none'
+};
+const MASK_CHOICES = {
+  base:   [['half','Half-mask'],['full','Full mask'],['zanni','Long-nose zanni']],
+  color:  ['#c9a227','#b03a2e','#3f5c8a','#4f6b3a','#2b2b2b','#f3ead7','#8a4a6b','#a06a3a'],
+  pattern:[['none','Plain'],['diamonds','Harlequin diamonds'],['checks','Checkerboard'],['stars','Stars']],
+  eyes:   [['round','Round'],['cat','Sly cat-eye'],['sad','Weeping']],
+  nose:   [['snub','Cheeky snub'],['hook','Greedy hook'],['long','Comic beak']],
+  trim:   [['gold','Gold trim'],['silver','Silver trim'],['none','No trim']],
+  feather:[['none','No feather'],['#c94a5a','Red feather'],['#3f5c8a','Blue feather'],['#c9a227','Gold feather']],
+};
+const MASK_LABELS = { base:'Mask shape', color:'Leather color', pattern:'Painted pattern', eyes:'Eye shape', nose:'Nose', trim:'Trim', feather:'Feather' };
+
+function openMask(){
+  openOverlay('ov-mask');
+  buildMaskControls();
+  drawMask();
+}
+function buildMaskControls(){
+  const box = $('mask-controls'); box.innerHTML = '';
+  for(const key of Object.keys(MASK_CHOICES)){
+    const row = document.createElement('div'); row.className = 'opt-row';
+    row.innerHTML = `<span class="lbl">${MASK_LABELS[key]}</span>`;
+    for(const choice of MASK_CHOICES[key]){
+      if(key === 'color'){
+        const s = document.createElement('span');
+        s.className = 'swatch' + (maskOpts.color === choice ? ' sel' : '');
+        s.style.background = choice;
+        s.onclick = ()=>{ maskOpts.color = choice; buildMaskControls(); drawMask(); };
+        row.appendChild(s);
+      } else {
+        const [val, label] = choice;
+        const c = document.createElement('span');
+        c.className = 'chip' + (maskOpts[key] === val ? ' sel' : '');
+        c.textContent = label;
+        c.onclick = ()=>{ maskOpts[key] = val; buildMaskControls(); drawMask(); };
+        row.appendChild(c);
+      }
+    }
+    box.appendChild(row);
+  }
+  const hint = document.createElement('p'); hint.className = 'small';
+  hint.innerHTML = 'Tip: a <b>hooked nose</b> says Pantalone, a <b>long beak</b> says the zanni, <b>diamonds</b> say Arlecchino. What does <i>your</i> mask say?';
+  box.appendChild(hint);
+}
+
+const MC = $('mask-canvas'), mg = MC.getContext('2d');
+function drawMask(){
+  const W = MC.width, H = MC.height;
+  mg.setTransform(1,0,0,1,0,0);
+  mg.clearRect(0,0,W,H);
+  mg.fillStyle = '#efe3c4'; mg.fillRect(0,0,W,H);
+  mg.save();
+  mg.translate(W/2, H/2 + 6);
+
+  const full = maskOpts.base === 'full';
+  const mw = 108, mh = full ? 140 : 78;
+
+  // mask base path
+  const basePath = ()=>{
+    mg.beginPath();
+    if(full){
+      mg.moveTo(0,-mh*.72);
+      mg.bezierCurveTo(mw*.9,-mh*.72, mw*.92,mh*.1, 0,mh*.75);
+      mg.bezierCurveTo(-mw*.92,mh*.1, -mw*.9,-mh*.72, 0,-mh*.72);
+    } else {
+      mg.moveTo(-mw*.88,-30);
+      mg.quadraticCurveTo(0,-mh, mw*.88,-30);
+      mg.quadraticCurveTo(mw*.96,4, mw*.6,26);
+      mg.quadraticCurveTo(mw*.3,40, 0,30);
+      mg.quadraticCurveTo(-mw*.3,40, -mw*.6,26);
+      mg.quadraticCurveTo(-mw*.96,4, -mw*.88,-30);
+    }
+    mg.closePath();
+  };
+
+  // drop shadow
+  mg.save(); mg.translate(5,8); basePath(); mg.fillStyle = 'rgba(0,0,0,.18)'; mg.fill(); mg.restore();
+
+  basePath(); mg.fillStyle = maskOpts.color; mg.fill();
+
+  // pattern (clipped)
+  mg.save(); basePath(); mg.clip();
+  if(maskOpts.pattern === 'diamonds'){
+    const cols = ['#b23a2e','#3a6b4f','#3a4f8a','#e9c46a'];
+    let k = 0;
+    for(let y=-mh; y<mh; y+=26) for(let x=-mw; x<mw; x+=26){
+      mg.fillStyle = cols[(k++)%4]; mg.globalAlpha = .8;
+      mg.save(); mg.translate(x + ((y/26)%2?13:0), y); mg.rotate(Math.PI/4); mg.fillRect(-9,-9,18,18); mg.restore();
+    }
+    mg.globalAlpha = 1;
+  } else if(maskOpts.pattern === 'checks'){
+    mg.fillStyle = 'rgba(0,0,0,.28)';
+    for(let y=-mh; y<mh; y+=24) for(let x=-mw; x<mw; x+=24)
+      if(((x+y)/24)%2 === 0) mg.fillRect(x,y,24,24);
+  } else if(maskOpts.pattern === 'stars'){
+    mg.fillStyle = 'rgba(255,244,200,.9)'; mg.font = '16px serif'; mg.textAlign='center';
+    for(let y=-mh+14; y<mh; y+=32) for(let x=-mw+14; x<mw; x+=34) mg.fillText('✦', x + ((y%64)?9:0), y);
+  }
+  // shading
+  const grad = mg.createRadialGradient(-20,-30,10, 0,0, mw*1.2);
+  grad.addColorStop(0,'rgba(255,255,255,.25)'); grad.addColorStop(1,'rgba(0,0,0,.22)');
+  mg.fillStyle = grad; basePath(); mg.fill();
+  mg.restore();
+
+  // trim
+  if(maskOpts.trim !== 'none'){
+    basePath();
+    mg.strokeStyle = maskOpts.trim === 'gold' ? '#e9c46a' : '#cfd4da';
+    mg.lineWidth = 5; mg.stroke();
+    basePath(); mg.strokeStyle = 'rgba(59,42,26,.8)'; mg.lineWidth = 1.5; mg.stroke();
+  } else {
+    basePath(); mg.strokeStyle = 'rgba(59,42,26,.8)'; mg.lineWidth = 2; mg.stroke();
+  }
+
+  // eyes
+  const eyeY = full ? -34 : -22;
+  for(const s of [-1,1]){
+    mg.save(); mg.translate(s*40, eyeY);
+    mg.fillStyle = '#20180f';
+    mg.beginPath();
+    if(maskOpts.eyes === 'round') mg.ellipse(0,0,15,11,0,0,TAU);
+    else if(maskOpts.eyes === 'cat') mg.ellipse(0,0,17,8, s*.42, 0, TAU);
+    else mg.ellipse(0,2,14,10, -s*.35, 0, TAU);
+    mg.fill();
+    if(maskOpts.trim!=='none'){ mg.strokeStyle = maskOpts.trim==='gold'?'#e9c46a':'#cfd4da'; mg.lineWidth=2.4; mg.stroke(); }
+    mg.restore();
+  }
+  // brows for expression
+  mg.strokeStyle = 'rgba(32,24,15,.75)'; mg.lineWidth = 4; mg.lineCap='round';
+  for(const s of [-1,1]){
+    mg.beginPath();
+    if(maskOpts.eyes === 'sad'){ mg.moveTo(s*24, eyeY-16); mg.quadraticCurveTo(s*44, eyeY-24, s*56, eyeY-12); }
+    else { mg.moveTo(s*24, eyeY-20); mg.quadraticCurveTo(s*44, eyeY-28, s*58, eyeY-18); }
+    mg.stroke();
+  }
+
+  // nose
+  mg.fillStyle = shade(maskOpts.color, -28);
+  mg.strokeStyle = 'rgba(59,42,26,.7)'; mg.lineWidth = 2;
+  const noseTop = full ? -16 : -8;
+  mg.beginPath();
+  if(maskOpts.base === 'zanni' || maskOpts.nose === 'long'){
+    mg.moveTo(-14,noseTop); mg.quadraticCurveTo(0, noseTop+8, 0, 78); mg.quadraticCurveTo(2, noseTop+10, 14, noseTop);
+    mg.quadraticCurveTo(0, noseTop+4, -14, noseTop);
+  } else if(maskOpts.nose === 'hook'){
+    mg.moveTo(-11,noseTop); mg.quadraticCurveTo(6, noseTop+18, 16, 46);
+    mg.quadraticCurveTo(2, 44, -4, 34); mg.quadraticCurveTo(-13, noseTop+14, -11, noseTop);
+  } else {
+    mg.moveTo(-10,noseTop); mg.quadraticCurveTo(0, noseTop+6, -2, 26);
+    mg.quadraticCurveTo(6, 30, 10, 22); mg.quadraticCurveTo(12, noseTop+8, 10, noseTop);
+    mg.quadraticCurveTo(0, noseTop+4, -10, noseTop);
+  }
+  mg.closePath(); mg.fill(); mg.stroke();
+
+  // feather
+  if(maskOpts.feather !== 'none'){
+    mg.save();
+    mg.translate(full ? -62 : -78, full ? -88 : -48);
+    mg.rotate(-.5);
+    mg.fillStyle = maskOpts.feather;
+    mg.beginPath(); mg.ellipse(0,-34,10,38,0,0,TAU); mg.fill();
+    mg.strokeStyle = 'rgba(255,255,255,.55)'; mg.lineWidth = 2;
+    mg.beginPath(); mg.moveTo(0,0); mg.lineTo(0,-68); mg.stroke();
+    for(let i=1;i<7;i++){
+      mg.beginPath(); mg.moveTo(0,-i*10); mg.lineTo(-7,-i*10-7); mg.stroke();
+      mg.beginPath(); mg.moveTo(0,-i*10); mg.lineTo(7,-i*10-7); mg.stroke();
+    }
+    mg.restore();
+  }
+  mg.restore();
+
+  // caption
+  mg.fillStyle = 'rgba(59,42,26,.7)'; mg.font = 'italic 13px Georgia'; mg.textAlign = 'center';
+  mg.fillText('La tua maschera — your mask', W/2, H-12);
+}
+
+$('mask-download').onclick = ()=>{
+  try{
+    const a = document.createElement('a');
+    a.download = 'my-commedia-mask.png';
+    a.href = MC.toDataURL('image/png');
+    a.click();
+  }catch(e){ toast('Could not download here — but your mask still counts!'); }
+};
+$('mask-done').onclick = ()=>{
+  awardStamp('mask', 'Mask of your own');
+  closeOverlay('ov-mask');
+  toast('🎭 Maestro Fava: "Bellissima! Wear it proudly!"');
+};
+
+// ---------------------------------------------------------------- main loop
+let lastT = performance.now();
+function loop(now){
+  requestAnimationFrame(loop);
+  const dt = Math.min(.05, (now - lastT)/1000); lastT = now;
+  const t = now/1000;
+
+  if(started && !dialogState.open && !anyOverlayOpen()){
+    let dx = 0, dy = 0;
+    if(keys['w'] || keys['arrowup']) dy -= 1;
+    if(keys['s'] || keys['arrowdown']) dy += 1;
+    if(keys['a'] || keys['arrowleft']) dx -= 1;
+    if(keys['d'] || keys['arrowright']) dx += 1;
+    player.moving = (dx || dy);
+    if(player.moving){
+      const m = Math.hypot(dx,dy);
+      dx /= m; dy /= m;
+      if(dx) player.facing = dx > 0 ? 1 : -1;
+      const nx = clamp(player.x + dx * player.speed * dt, 14, WORLD.w - 14);
+      const ny = clamp(player.y + dy * player.speed * dt, 60, WORLD.h - 14);
+      if(!collides(nx, player.y)) player.x = nx;
+      if(!collides(player.x, ny)) player.y = ny;
+      player.animT += dt;
+    }
+    // proximity prompt
+    const c = nearestCharacter();
+    const p = $('prompt');
+    if(c && !toastTimer){
+      p.style.display = 'block';
+      p.textContent = (isTouch ? 'Tap TALK' : 'Press E') + ` to talk to ${c.name}` + (isCharFullyDone(c) ? ' ✔' : ' ❗');
+    } else if(!toastTimer){
+      p.style.display = 'none';
+    }
+  }
+  drawWorld(t);
+}
+
+$('btn-start').onclick = ()=>{
+  closeOverlay('ov-intro');
+  started = true;
+  updateHUD();
+  if(stampCount() > 0) toast(`Welcome back! Progress restored: ${stampCount()}/${TOTAL_STAMPS} stamps.`);
+};
+
+updateHUD();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
