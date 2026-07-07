@@ -172,10 +172,6 @@ body.sheet-open #sheet-bg{opacity:1;pointer-events:auto}
   background:linear-gradient(120deg,#efeafd,#b7a6f7,#8f7ff0);color:#160f2e;font-weight:900;font-size:16px;
   box-shadow:0 10px 34px rgba(124,92,245,.5);transition:transform .35s cubic-bezier(.32,.72,.28,1);cursor:pointer}
 #restchip.show{transform:translateX(-50%) translateY(0)}
-/* ---- hr chip ---- */
-.hrchip{display:inline-flex;align-items:center;gap:6px;font-weight:800;color:#ffb3c1;font-size:14px}
-.hrchip .beat{display:inline-block;animation:beat 1s ease-in-out infinite}
-@keyframes beat{0%,100%{transform:scale(1)}25%{transform:scale(1.25)}}
 /* ---- body svg ---- */
 .bodywrap{display:flex;justify-content:center;gap:8px}
 .muscle{fill:rgba(220,214,245,.07);stroke:rgba(220,214,245,.14);stroke-width:1;transition:all .3s}
@@ -193,8 +189,6 @@ body.sheet-open #sheet-bg{opacity:1;pointer-events:auto}
 .hist-row:last-child{border:none}
 .dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,#c4b5fd,#7c5cf5);flex:none;
   box-shadow:0 0 8px rgba(167,139,250,.8)}
-/* ---- big timer ---- */
-.bigtimer{font-size:56px;font-weight:900;text-align:center;font-variant-numeric:tabular-nums;letter-spacing:.02em;margin:8px 0}
 /* misc */
 .divider{height:1px;background:linear-gradient(90deg,transparent,rgba(200,190,255,.2),transparent);margin:14px 0}
 .muted{color:var(--dim);font-size:13px;line-height:1.55}
@@ -456,12 +450,9 @@ function homeView(){
     week=p.sessions.filter(s=>s.ts>Date.now()-7*864e5).length,
     best=bestMile();
   return`
-  <div class="spread" style="margin-bottom:18px">
-    <div>
-      <div class="eyebrow">EOS GYM // ${esc(p.name)}</div>
-      <h1 class="chrome-text">EOS PULSE</h1>
-    </div>
-    <div id="hr-home">${hrChipHTML()}</div>
+  <div style="margin-bottom:18px">
+    <div class="eyebrow">EOS GYM // ${esc(p.name)}</div>
+    <h1 class="chrome-text">EOS PULSE</h1>
   </div>
 
   <div class="card fade-in" onclick="startProgram('${sugg}')" style="cursor:pointer">
@@ -529,9 +520,8 @@ function sessionView(){
   const p=P(),doneSets=SESSION.entries.reduce((a,e)=>a+e.sets.filter(s=>s.done).length,0),
     totSets=SESSION.entries.reduce((a,e)=>a+e.sets.length,0);
   return`
-  <div class="spread" style="margin-bottom:6px">
+  <div style="margin-bottom:6px">
     <button class="btn small ghost" onclick="confirmAbandon()">‹ Exit</button>
-    <div id="hr-home">${hrChipHTML()}</div>
   </div>
   <div class="eyebrow">Live session · ${doneSets}/${totSets} sets</div>
   <h1 class="chrome-text" style="margin-bottom:4px">${esc(SESSION.name).toUpperCase()}</h1>
@@ -693,39 +683,31 @@ function openAddExercise(key){
 function addToProgram(key,exId){P().programs[key].slots.push({ex:exId,sets:3,reps:'10'});save();openProgramEditor(key);}
 
 /* ================================================================
-   CARDIO — run & swim
+   CARDIO — run & swim (watch-first: do it on your Apple Watch,
+   log the result here in a few taps)
    ================================================================ */
-let cardioInt=null;
 function startCardio(kind){
-  CARDIO_TIMER={kind,start:null,elapsed:0,running:false,blocks:{}};
+  CARDIO_TIMER={kind,blocks:{}};
   TAB='train';render();window.scrollTo(0,0);
 }
-function cardioTick(){if(CARDIO_TIMER?.running){CARDIO_TIMER.elapsed=(Date.now()-CARDIO_TIMER.start)/1000;
-  const el=$('#bigtimer');if(el)el.textContent=fmtTime(CARDIO_TIMER.elapsed);}}
-function toggleCardioTimer(){
-  const c=CARDIO_TIMER;
-  if(c.running){c.running=false;clearInterval(cardioInt);}
-  else{c.start=Date.now()-c.elapsed*1000;c.running=true;cardioInt=setInterval(cardioTick,250);}
-  render();
-}
-function exitCardio(){if(CARDIO_TIMER.elapsed>10&&!confirm('Leave without saving?'))return;
-  clearInterval(cardioInt);CARDIO_TIMER=null;render();}
+function exitCardio(){CARDIO_TIMER=null;render();}
 
 function runView(){
-  const c=CARDIO_TIMER,streak=runStreak(),best=bestMile();
+  const streak=runStreak(),best=bestMile();
   const recent=P().cardio.filter(x=>x.kind==='run').slice(-5).reverse();
   return`
   <button class="btn small ghost" onclick="exitCardio()">‹ Exit</button>
   <div class="eyebrow mt8">Daily mile</div>
   <h1 class="chrome-text">MILE RUN 🏃</h1>
-  <div class="card mt14" style="text-align:center">
-    <div class="eyebrow">Session timer</div>
-    <div class="bigtimer chrome-text" id="bigtimer">${fmtTime(c.elapsed)}</div>
+  <div class="card mt14">
+    <div class="eyebrow" style="margin-bottom:6px">Log your run</div>
+    <div class="muted" style="margin-bottom:12px">Run with <b>Outdoor Run</b> on your Apple Watch, then type in the time it shows. (Auto-log setup: SET tab → ⌚)</div>
+    <div class="field"><label>Distance (miles)</label><input id="cd-dist" type="number" inputmode="decimal" value="1.0" step="0.05"></div>
     <div class="grid2">
-      <button class="btn ${c.running?'':'primary'}" onclick="toggleCardioTimer()">${c.running?'⏸ Pause':c.elapsed?'▶ Resume':'▶ Start'}</button>
-      <button class="btn" onclick="openSaveCardio('run')">✦ Save run</button>
+      <div class="field"><label>Minutes</label><input id="cd-min" type="number" inputmode="numeric" placeholder="8"></div>
+      <div class="field"><label>Seconds</label><input id="cd-sec" type="number" inputmode="numeric" placeholder="30"></div>
     </div>
-    <div class="muted mt14">💡 Start an <b>Outdoor Run</b> on your Apple Watch at the same time — heart rate & calories go to Apple Health, pace & streak live here.</div>
+    <button class="btn primary full" onclick="saveCardio('run')">SAVE RUN ✦</button>
   </div>
   <div class="grid2">
     <div class="card stat"><div class="lbl">🔥 Streak</div><div class="big chrome-text">${streak}<span style="font-size:14px"> days</span></div></div>
@@ -743,16 +725,7 @@ function swimView(){
   <button class="btn small ghost" onclick="exitCardio()">‹ Exit</button>
   <div class="eyebrow mt8">Pool session</div>
   <h1 class="chrome-text">SWIM SESH 🌊</h1>
-  <div class="card mt14" style="text-align:center">
-    <div class="eyebrow">Session timer</div>
-    <div class="bigtimer chrome-text" id="bigtimer">${fmtTime(c.elapsed)}</div>
-    <div class="grid2">
-      <button class="btn ${c.running?'':'primary'}" onclick="toggleCardioTimer()">${c.running?'⏸ Pause':c.elapsed?'▶ Resume':'▶ Start'}</button>
-      <button class="btn" onclick="openSaveCardio('swim')">✦ Save swim</button>
-    </div>
-    <div class="muted mt14">💡 Start a <b>Pool Swim</b> on your Apple Watch — it auto-counts laps & strokes into Apple Health.</div>
-  </div>
-  <div class="card">
+  <div class="card mt14">
     <div class="eyebrow" style="margin-bottom:10px">Workout structure · full body</div>
     ${blocks.map((b,i)=>`
       <div class="alt-row" onclick="CARDIO_TIMER.blocks[${i}]=!CARDIO_TIMER.blocks[${i}];render()">
@@ -760,38 +733,51 @@ function swimView(){
         <div><b>${esc(b.t)}</b><div class="muted">${esc(b.d)}</div></div>
       </div>`).join('')}
   </div>
+  <div class="card">
+    <div class="eyebrow" style="margin-bottom:6px">Log your swim</div>
+    <div class="muted" style="margin-bottom:12px">Use <b>Pool Swim</b> on your Apple Watch — it counts laps for you. Enter the totals here when you're done.</div>
+    <div class="field"><label>Laps completed</label><input id="cd-dist" type="number" inputmode="numeric" value="22"></div>
+    <div class="grid2">
+      <div class="field"><label>Minutes</label><input id="cd-min" type="number" inputmode="numeric" placeholder="25"></div>
+      <div class="field"><label>Seconds</label><input id="cd-sec" type="number" inputmode="numeric" placeholder="0"></div>
+    </div>
+    <button class="btn primary full" onclick="saveCardio('swim')">SAVE SWIM ✦</button>
+  </div>
   ${recent.length?`<div class="card"><div class="eyebrow" style="margin-bottom:6px">Recent swims</div>
     ${recent.map(r=>`<div class="hist-row"><div class="dot"></div>
       <div style="flex:1"><b>${r.laps} laps</b> · ${fmtTime(r.sec)}</div>
       <span class="muted">${fmtDate(r.ts)}</span></div>`).join('')}</div>`:''}`;
 }
-function openSaveCardio(kind){
-  const c=CARDIO_TIMER;
-  const mins=Math.floor(c.elapsed/60),secs=Math.round(c.elapsed%60);
-  openSheet(kind==='run'?`
-    <h2 class="chrome-text" style="font-size:22px;font-weight:900">SAVE RUN ✦</h2>
-    <div class="field mt14"><label>Distance (miles)</label><input id="cd-dist" type="number" inputmode="decimal" value="1.0" step="0.05"></div>
-    <div class="grid2">
-      <div class="field"><label>Minutes</label><input id="cd-min" type="number" inputmode="numeric" value="${mins}"></div>
-      <div class="field"><label>Seconds</label><input id="cd-sec" type="number" inputmode="numeric" value="${secs}"></div>
-    </div>
-    <button class="btn primary full" onclick="saveCardio('run')">SAVE ✓</button>`:`
-    <h2 class="chrome-text" style="font-size:22px;font-weight:900">SAVE SWIM ✦</h2>
-    <div class="field mt14"><label>Laps completed</label><input id="cd-dist" type="number" inputmode="numeric" value="22"></div>
-    <div class="grid2">
-      <div class="field"><label>Minutes</label><input id="cd-min" type="number" inputmode="numeric" value="${mins}"></div>
-      <div class="field"><label>Seconds</label><input id="cd-sec" type="number" inputmode="numeric" value="${secs}"></div>
-    </div>
-    <button class="btn primary full" onclick="saveCardio('swim')">SAVE ✓</button>`);
-}
 function saveCardio(kind){
   const sec=(parseInt($('#cd-min').value)||0)*60+(parseInt($('#cd-sec').value)||0);
   const d=parseFloat($('#cd-dist').value)||0;
-  if(sec<=0){alert('Enter a time first');return;}
+  if(sec<=0){alert('Enter your time first');return;}
+  logCardio(kind,sec,d);
+  CARDIO_TIMER=null;render();
+}
+function logCardio(kind,sec,d){
   const rec={ts:Date.now(),kind,sec};
-  if(kind==='run')rec.dist=d;else rec.laps=d;
+  if(kind==='run')rec.dist=d||1;else rec.laps=d||0;
   P().cardio.push(rec);save();
-  clearInterval(cardioInt);CARDIO_TIMER=null;closeSheet();render();
+  return rec;
+}
+
+/* Auto-log from an iPhone Shortcut: the app can be opened with
+   ?run&dist=1&min=8.5  or  ?swim&laps=22&min=25  and it logs itself. */
+function importFromURL(){
+  const q=new URLSearchParams(location.search);
+  const num=v=>parseFloat(String(v||'').replace(/[^0-9.]/g,''))||0;
+  const kind=q.has('run')?'run':q.has('swim')?'swim':null;
+  if(!kind)return;
+  const sec=Math.round(num(q.get('min'))*60+num(q.get('sec')));
+  if(sec>0){
+    const d=kind==='run'?(num(q.get('dist'))||1):num(q.get('laps'));
+    logCardio(kind,sec,d);
+    openSheet(`<h2 class="chrome-text" style="font-size:22px;font-weight:900">${kind==='run'?'RUN':'SWIM'} LOGGED FROM WATCH ⌚✦</h2>
+      <div class="muted mt14">${kind==='run'?(d||1)+' mi':d+' laps'} · ${fmtTime(sec)} — saved to your log.</div>
+      <button class="btn primary full mt14" onclick="closeSheet()">NICE</button>`);
+  }
+  history.replaceState(null,'',location.pathname);
 }
 
 /* ================================================================
@@ -915,14 +901,14 @@ function settingsView(){
   </div>
 
   <div class="card fade-in">
-    <div class="eyebrow" style="margin-bottom:10px">⌚ Apple Watch & heart rate</div>
+    <div class="eyebrow" style="margin-bottom:10px">⌚ Apple Watch</div>
     <div class="muted">
       • <b>Add to Home Screen</b> (Share → Add to Home Screen in Safari) to run EOS PULSE full-screen like a native app.<br><br>
-      • Start the matching workout (<b>Traditional Strength Training</b>, <b>Outdoor Run</b>, or <b>Pool Swim</b>) on your Apple Watch when you start here — the Watch handles heart rate, calories & rings in Apple Health while EOS PULSE tracks your sets, weights & PRs.<br><br>
-      • <b>Live heart rate in-app:</b> works via Bluetooth in Chrome/Edge with any BLE heart-rate monitor (or an Apple Watch running an HR-broadcast app).
+      • Record workouts on your Watch as usual (<b>Outdoor Run</b>, <b>Pool Swim</b>, <b>Strength Training</b>). The Watch keeps heart rate, calories & rings in Apple Health — EOS PULSE keeps your sets, PRs, pace & streaks. When you finish, just type the time from your Watch into the run/swim screen.<br><br>
+      • <b>Auto-log your mile (optional):</b> on your iPhone open the <b>Shortcuts</b> app → Automation → + → <b>"When I Finish a Workout"</b> → Run Immediately → New Blank Automation → add the action <b>Open URLs</b> and set the URL to:<br>
+      <span style="word-break:break-all;color:#c8b8ff">https://krisoferz.github.io/mm-s/?run&dist=1&min=9</span><br>
+      (put your usual mile time after <b>min=</b>, or tap the blue Workout variable to insert its real duration). Every time you end a Watch run, EOS PULSE opens and logs it for your streak.
     </div>
-    <button class="btn full mt14" onclick="connectHR()">📡 Connect heart-rate monitor</button>
-    <div id="hr-status" class="muted mt8" style="text-align:center">${hrStatusText()}</div>
   </div>
 
   <div class="card fade-in">
@@ -976,36 +962,6 @@ function startRest(){
 function killRest(){clearInterval(restInt);$('#restchip').classList.remove('show');}
 
 /* ================================================================
-   HEART RATE (Web Bluetooth)
-   ================================================================ */
-let HR={bpm:null,device:null};
-function hrChipHTML(){return HR.bpm?`<span class="hrchip"><span class="beat">❤️</span>${HR.bpm} <span style="font-size:11px;color:var(--dim)">BPM</span></span>`:'';}
-function hrStatusText(){
-  if(HR.bpm)return'❤️ Connected — '+HR.bpm+' BPM';
-  if(!navigator.bluetooth)return'Bluetooth not available in this browser (on iPhone, use the Apple Watch Workout app alongside).';
-  return'Not connected';
-}
-async function connectHR(){
-  if(!navigator.bluetooth){alert('This browser doesn\'t support Web Bluetooth. On iPhone, just start the workout on your Apple Watch — Apple Health captures heart rate automatically.');return;}
-  try{
-    const device=await navigator.bluetooth.requestDevice({filters:[{services:['heart_rate']}]});
-    const server=await device.gatt.connect();
-    const svc=await server.getPrimaryService('heart_rate');
-    const ch=await svc.getCharacteristic('heart_rate_measurement');
-    await ch.startNotifications();
-    ch.addEventListener('characteristicvaluechanged',e=>{
-      const v=e.target.value;
-      HR.bpm=(v.getUint8(0)&1)?v.getUint16(1,true):v.getUint8(1);
-      const chip=$('#hr-home');if(chip)chip.innerHTML=hrChipHTML();
-      const st=$('#hr-status');if(st)st.textContent=hrStatusText();
-    });
-    HR.device=device;
-    device.addEventListener('gattserverdisconnected',()=>{HR.bpm=null;HR.device=null;render();});
-    render();
-  }catch(e){/* user cancelled or failed — no-op */}
-}
-
-/* ================================================================
    SHEET
    ================================================================ */
 function openSheet(html){$('#sheet-body').innerHTML=html;document.body.classList.add('sheet-open');}
@@ -1013,6 +969,7 @@ function closeSheet(){document.body.classList.remove('sheet-open');}
 
 /* go */
 render();
+importFromURL();
 </script>
 </body>
 </html>
