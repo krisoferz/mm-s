@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="EOS PULSE">
+<meta name="theme-color" content="#08070f">
+<title>EOS PULSE — Workout Tracker</title>
+<style>
+:root{
+  --bg:#08070f;
+  --bg2:#0e0c1a;
+  --glass:rgba(255,255,255,.045);
+  --glass2:rgba(255,255,255,.08);
+  --line:rgba(200,190,255,.14);
+  --txt:#eceaf6;
+  --dim:#9a93b8;
+  --chrome1:#f6f4ff; --chrome2:#c9c3e8; --chrome3:#8f7ff0; --chrome4:#5b3df0; --chrome5:#e8e5f2;
+  --accent:#a78bfa;
+  --good:#5eead4;
+  --warn:#fbbf24;
+  --danger:#fb7185;
+  --r:20px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,sans-serif;
+  background:var(--bg); color:var(--txt);
+  overflow-x:hidden;
+  padding-bottom:110px;
+}
+/* ---- liquid chrome background ---- */
+#bgfx{position:fixed;inset:0;z-index:-2;overflow:hidden;background:
+  radial-gradient(1200px 800px at 80% -10%, rgba(120,90,255,.14), transparent 60%),
+  radial-gradient(900px 700px at -10% 40%, rgba(190,180,240,.10), transparent 55%),
+  var(--bg);}
+.blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.5;mix-blend-mode:screen;animation:drift 26s ease-in-out infinite alternate}
+.blob.b1{width:420px;height:420px;top:-120px;right:-80px;background:linear-gradient(135deg,#cfc7f5,#7c5cf5)}
+.blob.b2{width:360px;height:360px;top:38%;left:-140px;background:linear-gradient(135deg,#efeafc,#6f5bd8);animation-delay:-8s}
+.blob.b3{width:300px;height:300px;bottom:-100px;right:10%;background:linear-gradient(135deg,#b9aef2,#4c2fd6);animation-delay:-16s}
+@keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(50px,60px) scale(1.15)}}
+#bgfx::after{content:"";position:absolute;inset:0;background-image:
+  linear-gradient(rgba(180,170,230,.05) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(180,170,230,.05) 1px,transparent 1px);
+  background-size:44px 44px;mask-image:radial-gradient(80% 60% at 50% 30%,black,transparent)}
+/* ---- typography ---- */
+.chrome-text{
+  background:linear-gradient(110deg,var(--chrome1) 0%,var(--chrome2) 22%,var(--chrome3) 45%,var(--chrome1) 62%,var(--chrome4) 82%,var(--chrome5) 100%);
+  background-size:220% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:shine 7s linear infinite;
+}
+@keyframes shine{to{background-position:220% 0}}
+h1{font-size:30px;font-weight:800;letter-spacing:.06em}
+.eyebrow{font-size:11px;letter-spacing:.32em;color:var(--dim);text-transform:uppercase;font-weight:600}
+/* ---- layout ---- */
+.wrap{max-width:560px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 18px) 18px 20px}
+.card{
+  background:var(--glass);border:1px solid var(--line);border-radius:var(--r);
+  padding:18px;margin-bottom:14px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  position:relative;overflow:hidden;
+}
+.card::before{content:"";position:absolute;inset:0;border-radius:var(--r);pointer-events:none;
+  background:linear-gradient(160deg,rgba(255,255,255,.10),transparent 34%)}
+.row{display:flex;align-items:center;gap:10px}
+.spread{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mt8{margin-top:8px}.mt14{margin-top:14px}
+/* ---- buttons ---- */
+button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:13px 20px;border-radius:16px;font-weight:700;font-size:15px;letter-spacing:.02em;
+  background:var(--glass2);border:1px solid var(--line);color:var(--txt);
+  transition:transform .12s ease, filter .2s;
+}
+.btn:active{transform:scale(.96)}
+.btn.primary{
+  background:linear-gradient(120deg,#efeafd,#b7a6f7 35%,#7c5cf5 70%,#cfc7f0);
+  background-size:180% 100%;color:#17102e;border:none;
+  box-shadow:0 6px 24px rgba(124,92,245,.35), inset 0 1px 0 rgba(255,255,255,.7);
+  animation:shine 6s linear infinite;
+}
+.btn.small{padding:8px 13px;font-size:13px;border-radius:12px}
+.btn.ghost{background:transparent}
+.btn.full{width:100%}
+.btn.danger{color:var(--danger);border-color:rgba(251,113,133,.3)}
+.iconbtn{width:38px;height:38px;border-radius:12px;background:var(--glass2);border:1px solid var(--line);
+  display:inline-flex;align-items:center;justify-content:center;font-size:16px;flex:none}
+/* ---- chips ---- */
+.chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;
+  font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);color:#c8b8ff}
+.chip.silver{background:rgba(230,228,242,.08);border-color:rgba(230,228,242,.22);color:#cdc9de}
+.chip.good{background:rgba(94,234,212,.1);border-color:rgba(94,234,212,.3);color:var(--good)}
+.chip.warn{background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.35);color:var(--warn)}
+/* ---- nav ---- */
+nav{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 14px);
+  display:flex;gap:4px;padding:7px;border-radius:24px;z-index:50;
+  background:rgba(16,14,28,.78);border:1px solid var(--line);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  box-shadow:0 12px 40px rgba(0,0,0,.5);
+}
+nav button{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:9px 15px;border-radius:18px;color:var(--dim);font-size:10px;font-weight:700;letter-spacing:.08em;
+}
+nav button svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav button.on{color:#efe9ff;background:linear-gradient(135deg,rgba(167,139,250,.22),rgba(124,92,245,.10));
+  box-shadow:inset 0 0 0 1px rgba(167,139,250,.35)}
+/* ---- program cards ---- */
+.pcard{display:flex;align-items:center;gap:14px;cursor:pointer}
+.pcard .orb{
+  width:52px;height:52px;border-radius:16px;flex:none;display:flex;align-items:center;justify-content:center;font-size:23px;
+  background:linear-gradient(135deg,rgba(246,244,255,.16),rgba(124,92,245,.28));
+  border:1px solid rgba(200,190,255,.25);box-shadow:inset 0 1px 0 rgba(255,255,255,.25)}
+.pcard h3{font-size:17px;font-weight:800;letter-spacing:.03em}
+.pcard .sub{font-size:12.5px;color:var(--dim);margin-top:3px}
+.pcard .arrow{margin-left:auto;color:var(--dim);font-size:18px}
+/* ---- exercise / set rows ---- */
+.exname{font-size:16px;font-weight:800;letter-spacing:.02em}
+.sets-head,.set-row{display:grid;grid-template-columns:34px 1fr 1fr 44px;gap:8px;align-items:center}
+.sets-head{font-size:10px;color:var(--dim);letter-spacing:.14em;text-transform:uppercase;margin:12px 0 6px;text-align:center}
+.set-row{margin-bottom:8px}
+.set-num{text-align:center;font-weight:800;color:var(--dim);font-size:13px}
+.set-row input{
+  width:100%;padding:11px 8px;text-align:center;border-radius:12px;font-size:16px;font-weight:700;
+  background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--txt);font-family:inherit;
+}
+.set-row input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(167,139,250,.15)}
+.check{
+  width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.05);
+  display:flex;align-items:center;justify-content:center;color:transparent;font-size:18px;transition:all .15s;
+}
+.check.done{background:linear-gradient(135deg,#c4b5fd,#7c5cf5);border-color:transparent;color:#160f2e;
+  box-shadow:0 4px 16px rgba(124,92,245,.4)}
+.set-row.donerow input{opacity:.45}
+/* ---- inputs ---- */
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.field label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);font-weight:700}
+.field input,.field select{
+  padding:13px 14px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid var(--line);
+  color:var(--txt);font-size:16px;font-family:inherit;font-weight:600;
+}
+.field input:focus,.field select:focus{outline:none;border-color:var(--accent)}
+.field select option{background:#141224;color:#fff}
+/* ---- sheet / modal ---- */
+#sheet-bg{position:fixed;inset:0;background:rgba(4,3,10,.6);backdrop-filter:blur(6px);z-index:90;
+  opacity:0;pointer-events:none;transition:opacity .25s}
+#sheet{position:fixed;left:0;right:0;bottom:0;z-index:91;max-height:82vh;overflow-y:auto;
+  background:linear-gradient(180deg,#171428,#0d0b19);border-radius:26px 26px 0 0;border-top:1px solid var(--line);
+  padding:14px 18px calc(env(safe-area-inset-bottom) + 24px);
+  transform:translateY(105%);transition:transform .3s cubic-bezier(.32,.72,.28,1)}
+body.sheet-open #sheet{transform:none}
+body.sheet-open #sheet-bg{opacity:1;pointer-events:auto}
+.grab{width:44px;height:5px;border-radius:3px;background:rgba(255,255,255,.18);margin:0 auto 14px}
+.alt-row{display:flex;align-items:center;gap:12px;padding:13px 6px;border-bottom:1px solid rgba(255,255,255,.06);cursor:pointer}
+.alt-row:last-child{border-bottom:none}
+/* ---- stats ---- */
+.stat{padding:14px}
+.stat .big{font-size:26px;font-weight:900;letter-spacing:.01em;margin-top:2px}
+.stat .lbl{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);font-weight:700}
+/* ---- timer chip ---- */
+#restchip{
+  position:fixed;left:50%;transform:translateX(-50%) translateY(-140%);top:calc(env(safe-area-inset-top) + 12px);z-index:80;
+  display:flex;align-items:center;gap:10px;padding:11px 20px;border-radius:999px;
+  background:linear-gradient(120deg,#efeafd,#b7a6f7,#8f7ff0);color:#160f2e;font-weight:900;font-size:16px;
+  box-shadow:0 10px 34px rgba(124,92,245,.5);transition:transform .35s cubic-bezier(.32,.72,.28,1);cursor:pointer}
+#restchip.show{transform:translateX(-50%) translateY(0)}
+/* ---- hr chip ---- */
+.hrchip{display:inline-flex;align-items:center;gap:6px;font-weight:800;color:#ffb3c1;font-size:14px}
+.hrchip .beat{display:inline-block;animation:beat 1s ease-in-out infinite}
+@keyframes beat{0%,100%{transform:scale(1)}25%{transform:scale(1.25)}}
+/* ---- body svg ---- */
+.bodywrap{display:flex;justify-content:center;gap:8px}
+.muscle{fill:rgba(220,214,245,.07);stroke:rgba(220,214,245,.14);stroke-width:1;transition:all .3s}
+.muscle.hl1{fill:rgba(167,139,250,.35);stroke:rgba(196,181,253,.6)}
+.muscle.hl2{fill:rgba(147,110,255,.6);stroke:#c4b5fd;filter:drop-shadow(0 0 5px rgba(167,139,250,.7))}
+.muscle.hl3{fill:url(#mgrad);stroke:#e9e2ff;filter:drop-shadow(0 0 8px rgba(167,139,250,.95))}
+.skel{stroke:rgba(200,192,235,.14);stroke-width:14;stroke-linecap:round;fill:none}
+.skel-fill{fill:rgba(200,192,235,.07)}
+.bodylbl{font-size:9px;letter-spacing:.2em;fill:var(--dim);text-transform:uppercase;font-weight:700}
+/* ---- charts ---- */
+.spark{width:100%;height:120px}
+.spark .axis{font-size:9px;fill:var(--dim)}
+/* ---- history ---- */
+.hist-row{display:flex;align-items:center;gap:12px;padding:13px 2px;border-bottom:1px solid rgba(255,255,255,.06)}
+.hist-row:last-child{border:none}
+.dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,#c4b5fd,#7c5cf5);flex:none;
+  box-shadow:0 0 8px rgba(167,139,250,.8)}
+/* ---- big timer ---- */
+.bigtimer{font-size:56px;font-weight:900;text-align:center;font-variant-numeric:tabular-nums;letter-spacing:.02em;margin:8px 0}
+/* misc */
+.divider{height:1px;background:linear-gradient(90deg,transparent,rgba(200,190,255,.2),transparent);margin:14px 0}
+.muted{color:var(--dim);font-size:13px;line-height:1.55}
+.fade-in{animation:fadein .3s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.pr-flash{animation:prflash 1.2s ease}
+@keyframes prflash{0%{box-shadow:0 0 0 0 rgba(94,234,212,.7)}70%{box-shadow:0 0 0 14px rgba(94,234,212,0)}100%{box-shadow:none}}
+::-webkit-scrollbar{display:none}
+</style>
+</head>
+<body>
+<div id="bgfx"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+<div class="wrap" id="view"></div>
+<div id="restchip" onclick="killRest()">⏳ <span id="restsec">90</span>s rest</div>
+<div id="sheet-bg" onclick="closeSheet()"></div>
+<div id="sheet"><div class="grab"></div><div id="sheet-body"></div></div>
+
+<nav id="nav">
+  <button data-tab="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg>HOME</button>
+  <button data-tab="train"><svg viewBox="0 0 24 24"><path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/></svg>TRAIN</button>
+  <button data-tab="body"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.6"/><path d="M12 8v7M12 15l-3.5 6M12 15l3.5 6M5 10.5c4 1.8 10 1.8 14 0"/></svg>BODY</button>
+  <button data-tab="history"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2.5"/></svg>LOG</button>
+  <button data-tab="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M19 12a7 7 0 0 0-.15-1.4l2.1-1.6-2-3.4-2.5 1a7 7 0 0 0-2.4-1.4L13.6 2h-3.2l-.45 2.6a7 7 0 0 0-2.4 1.4l-2.5-1-2 3.4 2.1 1.6A7 7 0 0 0 5 12c0 .5.05.95.15 1.4l-2.1 1.6 2 3.4 2.5-1a7 7 0 0 0 2.4 1.4l.45 2.6h3.2l.45-2.6a7 7 0 0 0 2.4-1.4l2.5 1 2-3.4-2.1-1.6c.1-.45.15-.9.15-1.4z"/></svg>SET</button>
+</nav>
+
+<script>
+/* ================================================================
+   EOS PULSE — futuristic workout tracker for EOS Gym
+   Single-file app. All data stays on-device (localStorage).
+   ================================================================ */
+
+/* ---------------- exercise database ---------------- */
+const MUSCLES = {chest:'Chest',shoulders:'Shoulders',biceps:'Biceps',triceps:'Triceps',forearms:'Forearms',
+  abs:'Core',quads:'Quads',hamstrings:'Hamstrings',glutes:'Glutes',calves:'Calves',lats:'Lats / Back',
+  traps:'Traps',lowerback:'Lower Back'};
+const EQUIP = {barbell:'Barbell',dumbbell:'Dumbbell',machine:'Machine',cable:'Cable',bodyweight:'Body'};
+const E=(id,name,equip,p,s=[])=>({id,name,equip,p,s});
+const EX=[
+  // chest
+  E('bb-bench','Barbell Bench Press','barbell',['chest'],['triceps','shoulders']),
+  E('bb-incline','Incline Barbell Press','barbell',['chest'],['shoulders','triceps']),
+  E('db-incline','Incline Dumbbell Press','dumbbell',['chest'],['shoulders','triceps']),
+  E('db-flat','Flat Dumbbell Press','dumbbell',['chest'],['triceps']),
+  E('mach-chest','Machine Chest Press','machine',['chest'],['triceps']),
+  E('pec-deck','Pec Deck Fly','machine',['chest'],[]),
+  E('cable-cross','Cable Crossover','cable',['chest'],[]),
+  // shoulders
+  E('mach-shoulder','Machine Shoulder Press','machine',['shoulders'],['triceps']),
+  E('db-shoulder','Seated Dumbbell Shoulder Press','dumbbell',['shoulders'],['triceps']),
+  E('bb-ohp','Barbell Overhead Press','barbell',['shoulders'],['triceps','abs']),
+  E('db-lateral','Dumbbell Lateral Raise','dumbbell',['shoulders'],[]),
+  E('cable-lateral','Cable Lateral Raise','cable',['shoulders'],[]),
+  E('mach-rear-delt','Machine Rear Delt Fly','machine',['shoulders'],['traps']),
+  E('face-pull','Cable Face Pull','cable',['shoulders'],['traps']),
+  // triceps
+  E('tri-pushdown','Cable Triceps Pushdown','cable',['triceps'],[]),
+  E('tri-overhead','Overhead Cable Extension','cable',['triceps'],[]),
+  E('mach-dip','Machine Dip','machine',['triceps'],['chest']),
+  E('skullcrusher','EZ-Bar Skullcrusher','barbell',['triceps'],[]),
+  E('db-tri-oh','Dumbbell Overhead Extension','dumbbell',['triceps'],[]),
+  // back
+  E('lat-pulldown','Lat Pulldown','machine',['lats'],['biceps']),
+  E('bb-row','Barbell Row','barbell',['lats'],['traps','biceps','lowerback']),
+  E('cable-row','Seated Cable Row','cable',['lats'],['biceps','traps']),
+  E('mach-high-row','Machine High Row','machine',['lats'],['biceps']),
+  E('db-row','Single-Arm Dumbbell Row','dumbbell',['lats'],['biceps']),
+  E('assist-pullup','Assisted Pull-Up Machine','machine',['lats'],['biceps']),
+  E('tbar-row','T-Bar Row','barbell',['lats'],['traps','biceps']),
+  // biceps
+  E('db-curl','Dumbbell Curl','dumbbell',['biceps'],['forearms']),
+  E('bb-curl','Barbell Curl','barbell',['biceps'],['forearms']),
+  E('mach-preacher','Machine Preacher Curl','machine',['biceps'],[]),
+  E('cable-hammer','Cable Hammer Curl','cable',['biceps'],['forearms']),
+  E('db-incline-curl','Incline Dumbbell Curl','dumbbell',['biceps'],[]),
+  // legs
+  E('bb-squat','Barbell Back Squat','barbell',['quads'],['glutes','hamstrings','lowerback']),
+  E('smith-squat','Smith Machine Squat','machine',['quads'],['glutes']),
+  E('leg-press','Leg Press','machine',['quads'],['glutes']),
+  E('hack-squat','Hack Squat Machine','machine',['quads'],['glutes']),
+  E('leg-ext','Leg Extension','machine',['quads'],[]),
+  E('walking-lunge','Walking Dumbbell Lunge','dumbbell',['quads'],['glutes']),
+  E('bulg-split','Bulgarian Split Squat','dumbbell',['quads'],['glutes']),
+  E('bb-rdl','Barbell Romanian Deadlift','barbell',['hamstrings'],['glutes','lowerback']),
+  E('db-rdl','Dumbbell Romanian Deadlift','dumbbell',['hamstrings'],['glutes']),
+  E('seated-curl','Seated Leg Curl','machine',['hamstrings'],[]),
+  E('lying-curl','Lying Leg Curl','machine',['hamstrings'],[]),
+  E('bb-hipthrust','Barbell Hip Thrust','barbell',['glutes'],['hamstrings']),
+  E('mach-glutedrive','Glute Drive Machine','machine',['glutes'],['hamstrings']),
+  E('abductor','Hip Abductor Machine','machine',['glutes'],[]),
+  E('stand-calf','Standing Calf Raise Machine','machine',['calves'],[]),
+  E('seat-calf','Seated Calf Raise','machine',['calves'],[]),
+  // core / traps / low back
+  E('cable-crunch','Cable Crunch','cable',['abs'],[]),
+  E('mach-crunch','Ab Crunch Machine','machine',['abs'],[]),
+  E('hang-knee','Hanging Knee Raise','bodyweight',['abs'],['forearms']),
+  E('plank','Plank','bodyweight',['abs'],['lowerback']),
+  E('db-shrug','Dumbbell Shrug','dumbbell',['traps'],['forearms']),
+  E('bb-shrug','Barbell Shrug','barbell',['traps'],['forearms']),
+  E('back-ext','Back Extension','machine',['lowerback'],['glutes','hamstrings']),
+];
+const exById=id=>EX.find(e=>e.id===id);
+
+/* ---------------- default programs ---------------- */
+const S=(ex,sets,reps)=>({ex,sets,reps});
+const DEFAULT_PROGRAMS={
+  push:{name:'Push Day',icon:'🔥',desc:'Chest · Shoulders · Triceps',type:'lift',slots:[
+    S('bb-bench',4,'8'),S('mach-shoulder',3,'10'),S('db-incline',3,'10'),S('pec-deck',3,'12'),S('db-lateral',3,'15'),S('tri-pushdown',3,'12')]},
+  pull:{name:'Pull Day',icon:'🧲',desc:'Back · Biceps · Rear Delts',type:'lift',slots:[
+    S('lat-pulldown',4,'10'),S('bb-row',4,'8'),S('cable-row',3,'10'),S('mach-rear-delt',3,'15'),S('db-curl',3,'12'),S('cable-hammer',3,'12')]},
+  legs:{name:'Leg Day',icon:'🦵',desc:'Quads · Hams · Glutes · Calves',type:'lift',slots:[
+    S('bb-squat',4,'6'),S('leg-press',3,'10'),S('leg-ext',3,'12'),S('seated-curl',3,'12'),S('bb-hipthrust',3,'10'),S('stand-calf',4,'15')]},
+  upper:{name:'Upper Body',icon:'💪',desc:'Full upper-body session',type:'lift',slots:[
+    S('bb-bench',4,'8'),S('bb-row',4,'8'),S('db-shoulder',3,'10'),S('lat-pulldown',3,'10'),S('db-curl',3,'12'),S('tri-pushdown',3,'12')]},
+  lower:{name:'Lower Body',icon:'⚡',desc:'Full lower-body session',type:'lift',slots:[
+    S('bb-rdl',4,'8'),S('hack-squat',3,'10'),S('walking-lunge',3,'12'),S('lying-curl',3,'12'),S('seat-calf',4,'15'),S('cable-crunch',3,'15')]},
+  swim:{name:'Swim Session',icon:'🌊',desc:'Pool intervals · full body',type:'swim',blocks:[
+    {t:'Warm-up',d:'4 laps easy freestyle'},
+    {t:'Main set',d:'8 × 2 laps freestyle, 30s rest between'},
+    {t:'Kick set',d:'4 laps with kickboard'},
+    {t:'Pull set',d:'4 laps pull buoy (arms only)'},
+    {t:'Cool-down',d:'2 laps easy, any stroke'}]},
+  run:{name:'Mile Run',icon:'🏃',desc:'Daily mile · pace + streak',type:'run'},
+};
+const PROGRAM_ORDER=['push','pull','legs','upper','lower','swim','run'];
+
+/* ---------------- state ---------------- */
+const LS_KEY='eos.pulse.v1';
+let DATA=load();
+function blankProfile(name){return{name,unit:'lb',restSec:90,equipPref:['machine','barbell','dumbbell','cable','bodyweight'],
+  programs:JSON.parse(JSON.stringify(DEFAULT_PROGRAMS)),sessions:[],cardio:[],weights:[],lastSets:{}};}
+function load(){
+  try{const d=JSON.parse(localStorage.getItem(LS_KEY));if(d&&d.profiles)return d;}catch(e){}
+  return{active:'p1',profiles:{p1:blankProfile('Athlete')}};
+}
+function save(){try{localStorage.setItem(LS_KEY,JSON.stringify(DATA));}catch(e){}}
+function P(){return DATA.profiles[DATA.active];}
+
+/* ---------------- helpers ---------------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmtDate=ts=>new Date(ts).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+const fmtTime=sec=>{sec=Math.round(sec);const m=Math.floor(sec/60),s=sec%60;return m+':'+String(s).padStart(2,'0');};
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+const dayKey=ts=>{const d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+function muscleChips(ex){return ex.p.map(m=>`<span class="chip">${MUSCLES[m]}</span>`).join(' ')+' '+
+  ex.s.map(m=>`<span class="chip silver">${MUSCLES[m]}</span>`).join(' ');}
+function equipChip(ex){return `<span class="chip silver">${EQUIP[ex.equip]}</span>`;}
+
+/* max weight ever logged for an exercise (PR) */
+function prFor(exId){let max=0;P().sessions.forEach(s=>s.entries.forEach(en=>{
+  if(en.ex===exId)en.sets.forEach(st=>{if(st.done&&st.w>max)max=st.w;});}));return max;}
+
+/* run streak = consecutive days ending today/yesterday with a run */
+function runStreak(){
+  const days=new Set(P().cardio.filter(c=>c.kind==='run').map(c=>dayKey(c.ts)));
+  let streak=0;const d=new Date();
+  if(!days.has(dayKey(d.getTime())))d.setDate(d.getDate()-1); // allow "haven't run yet today"
+  while(days.has(dayKey(d.getTime()))){streak++;d.setDate(d.getDate()-1);}
+  return streak;
+}
+function bestMile(){let best=null;P().cardio.filter(c=>c.kind==='run'&&c.dist>0).forEach(c=>{
+  const pace=c.sec/c.dist;if(best===null||pace<best)best=pace;});return best;}
+
+/* ================================================================
+   BODY SVG — front + back muscle map
+   ================================================================ */
+const FRONT_SHAPES={
+  shoulders:[['c',64,80,12],['c',136,80,12]],
+  chest:[['e',84,99,16,13],['e',116,99,16,13]],
+  biceps:[['e',58,122,8,15],['e',142,122,8,15]],
+  forearms:[['e',51,158,7,17],['e',149,158,7,17]],
+  abs:[['r',88,114,24,46,9]],
+  quads:[['e',86,212,12,33],['e',114,212,12,33]],
+  calves:[['e',84,290,8,20],['e',116,290,8,20]],
+};
+const BACK_SHAPES={
+  traps:[['p','M100,54 L80,74 L100,88 L120,74 Z']],
+  shoulders:[['c',64,80,12],['c',136,80,12]],
+  lats:[['p','M79,92 Q63,112 71,140 Q85,152 93,141 L93,98 Z'],['p','M121,92 Q137,112 129,140 Q115,152 107,141 L107,98 Z']],
+  triceps:[['e',58,122,8,15],['e',142,122,8,15]],
+  forearms:[['e',51,158,7,17],['e',149,158,7,17]],
+  lowerback:[['p','M100,144 L88,158 L100,172 L112,158 Z']],
+  glutes:[['e',88,184,11,13],['e',112,184,11,13]],
+  hamstrings:[['e',86,224,11,30],['e',114,224,11,30]],
+  calves:[['e',84,292,9,22],['e',116,292,9,22]],
+};
+function shapeSVG(sh,cls){
+  const[k,...a]=sh;
+  if(k==='c')return`<circle class="muscle ${cls}" cx="${a[0]}" cy="${a[1]}" r="${a[2]}"/>`;
+  if(k==='e')return`<ellipse class="muscle ${cls}" cx="${a[0]}" cy="${a[1]}" rx="${a[2]}" ry="${a[3]}"/>`;
+  if(k==='r')return`<rect class="muscle ${cls}" x="${a[0]}" y="${a[1]}" width="${a[2]}" height="${a[3]}" rx="${a[4]}"/>`;
+  if(k==='p')return`<path class="muscle ${cls}" d="${a[0]}"/>`;
+  return'';
+}
+function skeleton(){return`
+  <circle class="skel-fill" cx="100" cy="27" r="14"/>
+  <path class="skel-fill" d="M72,58 L128,58 L123,152 L112,170 L88,170 L77,152 Z"/>
+  <line class="skel" x1="68" y1="70" x2="50" y2="178"/>
+  <line class="skel" x1="132" y1="70" x2="150" y2="178"/>
+  <line class="skel" x1="88" y1="172" x2="84" y2="322" style="stroke-width:19"/>
+  <line class="skel" x1="112" y1="172" x2="116" y2="322" style="stroke-width:19"/>`;}
+/* hl = {muscle: 0..1} */
+function bodySVG(hl,w=150){
+  const cls=v=>v>=0.8?'hl3':v>=0.45?'hl2':v>0?'hl1':'';
+  const draw=SH=>Object.entries(SH).map(([m,shapes])=>
+    shapes.map(s=>shapeSVG(s,cls(hl[m]||0))).join('')).join('');
+  return`<div class="bodywrap">
+    <svg class="fade-in" width="${w}" viewBox="0 0 200 355">
+      <defs><linearGradient id="mgrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#e9e2ff"/><stop offset=".5" stop-color="#a78bfa"/><stop offset="1" stop-color="#6d4df0"/>
+      </linearGradient></defs>
+      ${skeleton()}${draw(FRONT_SHAPES)}
+      <text class="bodylbl" x="100" y="350" text-anchor="middle">Front</text>
+    </svg>
+    <svg class="fade-in" width="${w}" viewBox="0 0 200 355">
+      ${skeleton()}${draw(BACK_SHAPES)}
+      <text class="bodylbl" x="100" y="350" text-anchor="middle">Back</text>
+    </svg>
+  </div>`;
+}
+function highlightsForExercise(ex){const h={};ex.p.forEach(m=>h[m]=1);ex.s.forEach(m=>h[m]=Math.max(h[m]||0,.45));return h;}
+function weeklyHighlights(){
+  const cutoff=Date.now()-7*864e5,vol={};let max=0;
+  P().sessions.filter(s=>s.ts>=cutoff).forEach(s=>s.entries.forEach(en=>{
+    const ex=exById(en.ex);if(!ex)return;const done=en.sets.filter(st=>st.done).length;
+    ex.p.forEach(m=>vol[m]=(vol[m]||0)+done);ex.s.forEach(m=>vol[m]=(vol[m]||0)+done*.5);}));
+  Object.values(vol).forEach(v=>{if(v>max)max=v;});
+  const h={};if(max>0)Object.entries(vol).forEach(([m,v])=>h[m]=v/max);
+  return h;
+}
+
+/* ================================================================
+   NAVIGATION
+   ================================================================ */
+let TAB='home';
+let SESSION=null;      // active lifting session
+let CARDIO_TIMER=null; // {kind, start, elapsed, running}
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{TAB=b.dataset.tab;render();});
+function render(){
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===TAB));
+  const v=$('#view');
+  if(TAB==='train'&&SESSION){v.innerHTML=sessionView();return;}
+  if(TAB==='train'&&CARDIO_TIMER){v.innerHTML=CARDIO_TIMER.kind==='run'?runView():swimView();return;}
+  v.innerHTML={home:homeView,train:trainView,body:bodyView,history:historyView,settings:settingsView}[TAB]();
+}
+
+/* ================================================================
+   HOME
+   ================================================================ */
+function suggestProgram(){
+  const lifts=P().sessions.slice(-6).map(s=>s.prog);
+  const cycle=['push','pull','legs'];
+  for(let i=lifts.length-1;i>=0;i--){const idx=cycle.indexOf(lifts[i]);if(idx>=0)return cycle[(idx+1)%3];}
+  return'push';
+}
+function homeView(){
+  const p=P(),streak=runStreak(),lastW=p.weights[p.weights.length-1],
+    sugg=suggestProgram(),sp=p.programs[sugg],
+    week=p.sessions.filter(s=>s.ts>Date.now()-7*864e5).length,
+    best=bestMile();
+  return`
+  <div class="spread" style="margin-bottom:18px">
+    <div>
+      <div class="eyebrow">EOS GYM // ${esc(p.name)}</div>
+      <h1 class="chrome-text">EOS PULSE</h1>
+    </div>
+    <div id="hr-home">${hrChipHTML()}</div>
+  </div>
+
+  <div class="card fade-in" onclick="startProgram('${sugg}')" style="cursor:pointer">
+    <div class="eyebrow" style="margin-bottom:8px">Up next in your split</div>
+    <div class="pcard">
+      <div class="orb">${sp.icon}</div>
+      <div><h3>${sp.name}</h3><div class="sub">${sp.desc}</div></div>
+      <div class="arrow">›</div>
+    </div>
+    <button class="btn primary full mt14">START ${sp.name.toUpperCase()} →</button>
+  </div>
+
+  <div class="grid2 fade-in">
+    <div class="card stat"><div class="lbl">🏃 Run streak</div><div class="big chrome-text">${streak}<span style="font-size:15px"> days</span></div></div>
+    <div class="card stat"><div class="lbl">⚡ Workouts / 7d</div><div class="big chrome-text">${week}</div></div>
+    <div class="card stat"><div class="lbl">⚖️ Bodyweight</div><div class="big chrome-text">${lastW?lastW.w+'<span style="font-size:15px"> '+p.unit+'</span>':'—'}</div></div>
+    <div class="card stat"><div class="lbl">🥇 Best mile</div><div class="big chrome-text">${best?fmtTime(best):'—'}</div></div>
+  </div>
+
+  <div class="grid2 fade-in">
+    <button class="btn" onclick="startCardio('run')">🏃 Run a mile</button>
+    <button class="btn" onclick="startCardio('swim')">🌊 Swim sesh</button>
+  </div>
+  <button class="btn full mt8" onclick="openWeightSheet()">⚖️ Log today's bodyweight</button>`;
+}
+
+/* ================================================================
+   TRAIN — program list
+   ================================================================ */
+function trainView(){
+  const p=P();
+  return`
+  <div class="eyebrow">Choose your session</div>
+  <h1 class="chrome-text" style="margin-bottom:16px">TRAIN</h1>
+  ${PROGRAM_ORDER.map(k=>{const pr=p.programs[k];return`
+  <div class="card fade-in">
+    <div class="pcard" onclick="startProgram('${k}')">
+      <div class="orb">${pr.icon}</div>
+      <div><h3>${esc(pr.name)}</h3><div class="sub">${esc(pr.desc)}</div></div>
+      <div class="arrow">›</div>
+    </div>
+    ${pr.type==='lift'?`<div class="spread mt14">
+      <div class="row" style="flex-wrap:wrap;gap:6px">${[...new Set(pr.slots.flatMap(s=>exById(s.ex)?.p||[]))].map(m=>`<span class="chip">${MUSCLES[m]}</span>`).join('')}</div>
+      <button class="btn small ghost" onclick="event.stopPropagation();openProgramEditor('${k}')">✏️ Edit</button>
+    </div>`:''}
+  </div>`;}).join('')}`;
+}
+
+/* ================================================================
+   LIFT SESSION
+   ================================================================ */
+function startProgram(key){
+  const pr=P().programs[key];
+  if(pr.type==='run'){startCardio('run');return;}
+  if(pr.type==='swim'){startCardio('swim');return;}
+  SESSION={prog:key,name:pr.name,start:Date.now(),
+    entries:pr.slots.map(sl=>{
+      const last=P().lastSets[sl.ex];
+      return{ex:sl.ex,reps:sl.reps,
+        sets:Array.from({length:sl.sets},(_,i)=>({w:last?.[i]?.w??'',r:last?.[i]?.r??sl.reps,done:false}))};
+    })};
+  TAB='train';render();window.scrollTo(0,0);
+}
+function sessionView(){
+  const p=P(),doneSets=SESSION.entries.reduce((a,e)=>a+e.sets.filter(s=>s.done).length,0),
+    totSets=SESSION.entries.reduce((a,e)=>a+e.sets.length,0);
+  return`
+  <div class="spread" style="margin-bottom:6px">
+    <button class="btn small ghost" onclick="confirmAbandon()">‹ Exit</button>
+    <div id="hr-home">${hrChipHTML()}</div>
+  </div>
+  <div class="eyebrow">Live session · ${doneSets}/${totSets} sets</div>
+  <h1 class="chrome-text" style="margin-bottom:4px">${esc(SESSION.name).toUpperCase()}</h1>
+  <div class="muted" style="margin-bottom:14px">⏱ started ${new Date(SESSION.start).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})} · tap ⇆ to swap any exercise</div>
+  ${SESSION.entries.map((en,i)=>{
+    const ex=exById(en.ex),pr=prFor(en.ex);
+    return`<div class="card fade-in" id="exc-${i}">
+      <div class="spread">
+        <div style="min-width:0">
+          <div class="exname">${esc(ex.name)}</div>
+          <div class="row mt8" style="flex-wrap:wrap;gap:5px">${equipChip(ex)}${muscleChips(ex)}</div>
+        </div>
+        <div class="row">
+          <button class="iconbtn" title="Muscles worked" onclick="openMuscleSheet('${ex.id}')">🧍</button>
+          <button class="iconbtn" title="Swap exercise" onclick="openSwapSheet(${i})">⇆</button>
+        </div>
+      </div>
+      ${pr?`<div class="mt8"><span class="chip good">PR ${pr} ${p.unit}</span> <span class="muted" style="font-size:11px">target ${en.reps} reps</span></div>`:''}
+      <div class="sets-head"><span>SET</span><span>${p.unit.toUpperCase()}</span><span>REPS</span><span>✓</span></div>
+      ${en.sets.map((st,j)=>`
+      <div class="set-row ${st.done?'donerow':''}">
+        <div class="set-num">${j+1}</div>
+        <input type="number" inputmode="decimal" placeholder="—" value="${st.w}" onchange="setVal(${i},${j},'w',this.value)">
+        <input type="number" inputmode="numeric" placeholder="${en.reps}" value="${st.r}" onchange="setVal(${i},${j},'r',this.value)">
+        <button class="check ${st.done?'done':''}" onclick="toggleSet(${i},${j})">✓</button>
+      </div>`).join('')}
+      <button class="btn small ghost" onclick="addSet(${i})">+ add set</button>
+    </div>`;}).join('')}
+  <button class="btn primary full" onclick="finishSession()">FINISH WORKOUT ✦</button>
+  <button class="btn full mt8 danger" onclick="confirmAbandon()">Discard session</button>`;
+}
+function setVal(i,j,k,v){SESSION.entries[i].sets[j][k]=v===''?'':parseFloat(v);}
+function toggleSet(i,j){
+  const st=SESSION.entries[i].sets[j];st.done=!st.done;
+  if(st.done){if(st.w==='')st.w=0;if(st.r==='')st.r=parseInt(SESSION.entries[i].reps)||0;startRest();}
+  render();
+  const el=document.getElementById('exc-'+i);
+  const pr=prFor(SESSION.entries[i].ex);
+  if(st.done&&st.w>pr&&pr>0&&el)el.classList.add('pr-flash');
+}
+function addSet(i){const s=SESSION.entries[i].sets;s.push({w:s[s.length-1]?.w??'',r:s[s.length-1]?.r??'',done:false});render();}
+function confirmAbandon(){if(confirm('Discard this session? Nothing will be saved.')){SESSION=null;render();}}
+function finishSession(){
+  const entries=SESSION.entries.map(en=>({ex:en.ex,sets:en.sets.filter(s=>s.done)})).filter(en=>en.sets.length);
+  if(!entries.length){alert('Check off at least one set first ✓');return;}
+  const prs=[];
+  entries.forEach(en=>{
+    const before=prFor(en.ex);
+    const mx=Math.max(...en.sets.map(s=>s.w||0));
+    if(mx>before&&before>0)prs.push(exById(en.ex).name+' — '+mx+' '+P().unit);
+    P().lastSets[en.ex]=en.sets.map(s=>({w:s.w,r:s.r}));
+  });
+  const sess={ts:Date.now(),prog:SESSION.prog,name:SESSION.name,dur:Math.round((Date.now()-SESSION.start)/1000),entries};
+  P().sessions.push(sess);save();
+  const vol=entries.reduce((a,en)=>a+en.sets.reduce((b,s)=>b+(s.w||0)*(s.r||0),0),0);
+  SESSION=null;killRest();
+  openSheet(`
+    <h2 class="chrome-text" style="font-size:24px;font-weight:900">SESSION COMPLETE ✦</h2>
+    <div class="grid2 mt14">
+      <div class="card stat"><div class="lbl">Duration</div><div class="big">${fmtTime(sess.dur)}</div></div>
+      <div class="card stat"><div class="lbl">Volume</div><div class="big">${Math.round(vol).toLocaleString()}<span style="font-size:13px"> ${P().unit}</span></div></div>
+    </div>
+    ${prs.length?`<div class="card"><div class="eyebrow" style="margin-bottom:8px">🏆 New PRs</div>${prs.map(x=>`<div class="chip good" style="margin:3px 4px 3px 0">${esc(x)}</div>`).join('')}</div>`:''}
+    <div class="muted">💡 Wearing your Apple Watch? End the workout there too so calories & heart rate land in Apple Health.</div>
+    <button class="btn primary full mt14" onclick="closeSheet();render()">DONE</button>`);
+  render();
+}
+
+/* ---------------- swap exercise ---------------- */
+let SWAP_SAVE=false;
+function openSwapSheet(i){
+  const cur=exById(SESSION.entries[i].ex);
+  const alts=EX.filter(e=>e.id!==cur.id&&e.p[0]===cur.p[0])
+    .sort((a,b)=>P().equipPref.indexOf(a.equip)-P().equipPref.indexOf(b.equip));
+  SWAP_SAVE=false;
+  openSheet(`
+    <div class="eyebrow">Swap out</div>
+    <h2 style="font-size:20px;font-weight:900" class="chrome-text">${esc(cur.name)}</h2>
+    <div class="muted mt8">Alternatives that hit <b>${MUSCLES[cur.p[0]]}</b>, ranked by your preferred equipment:</div>
+    <label class="row mt14" style="gap:10px;font-size:14px;font-weight:600;cursor:pointer">
+      <input type="checkbox" style="width:20px;height:20px;accent-color:#8b5cf6" onchange="SWAP_SAVE=this.checked">
+      Also make this my default in the program
+    </label>
+    <div class="divider"></div>
+    ${alts.map(a=>`
+      <div class="alt-row" onclick="doSwap(${i},'${a.id}')">
+        <div style="flex:1"><div style="font-weight:800">${esc(a.name)}</div>
+        <div class="row mt8" style="gap:5px;flex-wrap:wrap">${equipChip(a)}${muscleChips(a)}</div></div>
+        <span style="color:var(--accent);font-size:20px">⇆</span>
+      </div>`).join('')||'<div class="muted">No alternatives found.</div>'}`);
+}
+function doSwap(i,newId){
+  const en=SESSION.entries[i];
+  const oldId=en.ex;
+  en.ex=newId;
+  const last=P().lastSets[newId];
+  en.sets=en.sets.map((s,j)=>s.done?s:{w:last?.[j]?.w??'',r:last?.[j]?.r??en.reps,done:false});
+  if(SWAP_SAVE){const pr=P().programs[SESSION.prog];const sl=pr.slots.find(s=>s.ex===oldId);if(sl)sl.ex=newId;save();}
+  closeSheet();render();
+}
+function openMuscleSheet(exId){
+  const ex=exById(exId);
+  openSheet(`
+    <div class="eyebrow">You're working</div>
+    <h2 class="chrome-text" style="font-size:20px;font-weight:900">${esc(ex.name)}</h2>
+    <div class="row mt8" style="gap:5px;flex-wrap:wrap">${equipChip(ex)}${muscleChips(ex)}</div>
+    <div class="mt14">${bodySVG(highlightsForExercise(ex),140)}</div>
+    <div class="muted" style="text-align:center">Bright = primary target · Soft glow = assisting muscles</div>`);
+}
+
+/* ---------------- program editor ---------------- */
+function openProgramEditor(key){
+  const pr=P().programs[key];
+  openSheet(`
+    <div class="eyebrow">Customize program</div>
+    <h2 class="chrome-text" style="font-size:22px;font-weight:900">${esc(pr.name)}</h2>
+    <div id="editor-list">${editorRows(key)}</div>
+    <button class="btn full mt8" onclick="openAddExercise('${key}')">+ Add exercise</button>
+    <div class="grid2 mt8">
+      <button class="btn" onclick="resetProgram('${key}')">↺ Reset default</button>
+      <button class="btn primary" onclick="closeSheet();render()">Save ✓</button>
+    </div>`);
+}
+function editorRows(key){
+  const pr=P().programs[key];
+  return pr.slots.map((sl,i)=>{const ex=exById(sl.ex);return`
+    <div class="card" style="padding:13px;margin-bottom:10px">
+      <div class="spread">
+        <div style="min-width:0"><b>${esc(ex.name)}</b>
+          <div class="row mt8" style="gap:5px;flex-wrap:wrap">${equipChip(ex)}${muscleChips(ex)}</div></div>
+        <div class="row">
+          <button class="iconbtn" onclick="moveSlot('${key}',${i},-1)">↑</button>
+          <button class="iconbtn" onclick="moveSlot('${key}',${i},1)">↓</button>
+          <button class="iconbtn" style="color:var(--danger)" onclick="delSlot('${key}',${i})">✕</button>
+        </div>
+      </div>
+      <div class="row mt8" style="gap:14px">
+        <label class="muted">Sets <input type="number" value="${sl.sets}" min="1" max="10" style="width:58px;margin-left:6px;padding:7px;border-radius:9px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--txt);text-align:center" onchange="P().programs['${key}'].slots[${i}].sets=parseInt(this.value)||1;save()"></label>
+        <label class="muted">Reps <input value="${esc(sl.reps)}" style="width:64px;margin-left:6px;padding:7px;border-radius:9px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--txt);text-align:center" onchange="P().programs['${key}'].slots[${i}].reps=this.value;save()"></label>
+      </div>
+    </div>`;}).join('');
+}
+function moveSlot(key,i,d){const s=P().programs[key].slots;const j=i+d;if(j<0||j>=s.length)return;[s[i],s[j]]=[s[j],s[i]];save();$('#editor-list').innerHTML=editorRows(key);}
+function delSlot(key,i){P().programs[key].slots.splice(i,1);save();$('#editor-list').innerHTML=editorRows(key);}
+function resetProgram(key){P().programs[key]=JSON.parse(JSON.stringify(DEFAULT_PROGRAMS[key]));save();openProgramEditor(key);}
+function openAddExercise(key){
+  const groups={};EX.forEach(e=>{(groups[e.p[0]]=groups[e.p[0]]||[]).push(e);});
+  openSheet(`
+    <div class="eyebrow">Add to program</div>
+    <h2 class="chrome-text" style="font-size:22px;font-weight:900">EXERCISE LIBRARY</h2>
+    ${Object.entries(groups).map(([m,list])=>`
+      <div class="eyebrow mt14" style="margin-bottom:6px">${MUSCLES[m]}</div>
+      ${list.map(e=>`<div class="alt-row" onclick="addToProgram('${key}','${e.id}')">
+        <div style="flex:1"><b>${esc(e.name)}</b>
+        <div class="row mt8" style="gap:5px">${equipChip(e)}</div></div>
+        <span style="color:var(--good);font-size:20px">+</span>
+      </div>`).join('')}`).join('')}`);
+}
+function addToProgram(key,exId){P().programs[key].slots.push({ex:exId,sets:3,reps:'10'});save();openProgramEditor(key);}
+
+/* ================================================================
+   CARDIO — run & swim
+   ================================================================ */
+let cardioInt=null;
+function startCardio(kind){
+  CARDIO_TIMER={kind,start:null,elapsed:0,running:false,blocks:{}};
+  TAB='train';render();window.scrollTo(0,0);
+}
+function cardioTick(){if(CARDIO_TIMER?.running){CARDIO_TIMER.elapsed=(Date.now()-CARDIO_TIMER.start)/1000;
+  const el=$('#bigtimer');if(el)el.textContent=fmtTime(CARDIO_TIMER.elapsed);}}
+function toggleCardioTimer(){
+  const c=CARDIO_TIMER;
+  if(c.running){c.running=false;clearInterval(cardioInt);}
+  else{c.start=Date.now()-c.elapsed*1000;c.running=true;cardioInt=setInterval(cardioTick,250);}
+  render();
+}
+function exitCardio(){if(CARDIO_TIMER.elapsed>10&&!confirm('Leave without saving?'))return;
+  clearInterval(cardioInt);CARDIO_TIMER=null;render();}
+
+function runView(){
+  const c=CARDIO_TIMER,streak=runStreak(),best=bestMile();
+  const recent=P().cardio.filter(x=>x.kind==='run').slice(-5).reverse();
+  return`
+  <button class="btn small ghost" onclick="exitCardio()">‹ Exit</button>
+  <div class="eyebrow mt8">Daily mile</div>
+  <h1 class="chrome-text">MILE RUN 🏃</h1>
+  <div class="card mt14" style="text-align:center">
+    <div class="eyebrow">Session timer</div>
+    <div class="bigtimer chrome-text" id="bigtimer">${fmtTime(c.elapsed)}</div>
+    <div class="grid2">
+      <button class="btn ${c.running?'':'primary'}" onclick="toggleCardioTimer()">${c.running?'⏸ Pause':c.elapsed?'▶ Resume':'▶ Start'}</button>
+      <button class="btn" onclick="openSaveCardio('run')">✦ Save run</button>
+    </div>
+    <div class="muted mt14">💡 Start an <b>Outdoor Run</b> on your Apple Watch at the same time — heart rate & calories go to Apple Health, pace & streak live here.</div>
+  </div>
+  <div class="grid2">
+    <div class="card stat"><div class="lbl">🔥 Streak</div><div class="big chrome-text">${streak}<span style="font-size:14px"> days</span></div></div>
+    <div class="card stat"><div class="lbl">🥇 Best mile</div><div class="big chrome-text">${best?fmtTime(best):'—'}</div></div>
+  </div>
+  ${recent.length?`<div class="card"><div class="eyebrow" style="margin-bottom:6px">Recent runs</div>
+    ${recent.map(r=>`<div class="hist-row"><div class="dot"></div>
+      <div style="flex:1"><b>${r.dist} mi</b> · ${fmtTime(r.sec)} <span class="muted">(${fmtTime(r.sec/r.dist)}/mi)</span></div>
+      <span class="muted">${fmtDate(r.ts)}</span></div>`).join('')}</div>`:''}`;
+}
+function swimView(){
+  const c=CARDIO_TIMER,blocks=P().programs.swim.blocks;
+  const recent=P().cardio.filter(x=>x.kind==='swim').slice(-5).reverse();
+  return`
+  <button class="btn small ghost" onclick="exitCardio()">‹ Exit</button>
+  <div class="eyebrow mt8">Pool session</div>
+  <h1 class="chrome-text">SWIM SESH 🌊</h1>
+  <div class="card mt14" style="text-align:center">
+    <div class="eyebrow">Session timer</div>
+    <div class="bigtimer chrome-text" id="bigtimer">${fmtTime(c.elapsed)}</div>
+    <div class="grid2">
+      <button class="btn ${c.running?'':'primary'}" onclick="toggleCardioTimer()">${c.running?'⏸ Pause':c.elapsed?'▶ Resume':'▶ Start'}</button>
+      <button class="btn" onclick="openSaveCardio('swim')">✦ Save swim</button>
+    </div>
+    <div class="muted mt14">💡 Start a <b>Pool Swim</b> on your Apple Watch — it auto-counts laps & strokes into Apple Health.</div>
+  </div>
+  <div class="card">
+    <div class="eyebrow" style="margin-bottom:10px">Workout structure · full body</div>
+    ${blocks.map((b,i)=>`
+      <div class="alt-row" onclick="CARDIO_TIMER.blocks[${i}]=!CARDIO_TIMER.blocks[${i}];render()">
+        <button class="check ${c.blocks[i]?'done':''}" style="width:36px;height:36px">✓</button>
+        <div><b>${esc(b.t)}</b><div class="muted">${esc(b.d)}</div></div>
+      </div>`).join('')}
+  </div>
+  ${recent.length?`<div class="card"><div class="eyebrow" style="margin-bottom:6px">Recent swims</div>
+    ${recent.map(r=>`<div class="hist-row"><div class="dot"></div>
+      <div style="flex:1"><b>${r.laps} laps</b> · ${fmtTime(r.sec)}</div>
+      <span class="muted">${fmtDate(r.ts)}</span></div>`).join('')}</div>`:''}`;
+}
+function openSaveCardio(kind){
+  const c=CARDIO_TIMER;
+  const mins=Math.floor(c.elapsed/60),secs=Math.round(c.elapsed%60);
+  openSheet(kind==='run'?`
+    <h2 class="chrome-text" style="font-size:22px;font-weight:900">SAVE RUN ✦</h2>
+    <div class="field mt14"><label>Distance (miles)</label><input id="cd-dist" type="number" inputmode="decimal" value="1.0" step="0.05"></div>
+    <div class="grid2">
+      <div class="field"><label>Minutes</label><input id="cd-min" type="number" inputmode="numeric" value="${mins}"></div>
+      <div class="field"><label>Seconds</label><input id="cd-sec" type="number" inputmode="numeric" value="${secs}"></div>
+    </div>
+    <button class="btn primary full" onclick="saveCardio('run')">SAVE ✓</button>`:`
+    <h2 class="chrome-text" style="font-size:22px;font-weight:900">SAVE SWIM ✦</h2>
+    <div class="field mt14"><label>Laps completed</label><input id="cd-dist" type="number" inputmode="numeric" value="22"></div>
+    <div class="grid2">
+      <div class="field"><label>Minutes</label><input id="cd-min" type="number" inputmode="numeric" value="${mins}"></div>
+      <div class="field"><label>Seconds</label><input id="cd-sec" type="number" inputmode="numeric" value="${secs}"></div>
+    </div>
+    <button class="btn primary full" onclick="saveCardio('swim')">SAVE ✓</button>`);
+}
+function saveCardio(kind){
+  const sec=(parseInt($('#cd-min').value)||0)*60+(parseInt($('#cd-sec').value)||0);
+  const d=parseFloat($('#cd-dist').value)||0;
+  if(sec<=0){alert('Enter a time first');return;}
+  const rec={ts:Date.now(),kind,sec};
+  if(kind==='run')rec.dist=d;else rec.laps=d;
+  P().cardio.push(rec);save();
+  clearInterval(cardioInt);CARDIO_TIMER=null;closeSheet();render();
+}
+
+/* ================================================================
+   BODY — muscle heatmap + bodyweight
+   ================================================================ */
+function bodyView(){
+  const p=P(),hl=weeklyHighlights(),ws=p.weights;
+  const delta=ws.length>1?(ws[ws.length-1].w-ws[0].w):null;
+  return`
+  <div class="eyebrow">Last 7 days of training</div>
+  <h1 class="chrome-text" style="margin-bottom:14px">BODY MAP</h1>
+  <div class="card fade-in">
+    ${bodySVG(hl,150)}
+    <div class="muted" style="text-align:center;margin-top:8px">${Object.keys(hl).length?'Brighter = more sets this week':'Log a workout to light up your muscle map ⚡'}</div>
+  </div>
+  <div class="card fade-in">
+    <div class="spread">
+      <div><div class="eyebrow">Bodyweight</div>
+        <div class="big" style="font-size:28px;font-weight:900" >${ws.length?ws[ws.length-1].w+' '+p.unit:'—'}
+        ${delta!==null?`<span class="chip ${delta<=0?'good':'warn'}" style="vertical-align:middle">${delta>0?'+':''}${Math.round(delta*10)/10} ${p.unit}</span>`:''}</div></div>
+      <button class="btn small primary" onclick="openWeightSheet()">+ Log</button>
+    </div>
+    ${ws.length>1?weightChart():'<div class="muted mt8">Log your weight a few times to see the trend line.</div>'}
+  </div>`;
+}
+function weightChart(){
+  const ws=P().weights.slice(-30);
+  const vals=ws.map(x=>x.w),min=Math.min(...vals),max=Math.max(...vals),pad=(max-min)||2;
+  const W=480,H=110;
+  const pts=ws.map((x,i)=>[10+i*(W-20)/Math.max(ws.length-1,1),H-14-((x.w-min)/(pad))*(H-34)]);
+  const line=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  return`<svg class="spark mt14" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    <defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="rgba(167,139,250,.4)"/><stop offset="1" stop-color="rgba(167,139,250,0)"/></linearGradient></defs>
+    <path d="${line} L${pts[pts.length-1][0]},${H} L${pts[0][0]},${H} Z" fill="url(#wg)"/>
+    <path d="${line}" fill="none" stroke="url(#mgrad2)" stroke-width="2.5" stroke-linecap="round"/>
+    <defs><linearGradient id="mgrad2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#e9e2ff"/><stop offset=".5" stop-color="#a78bfa"/><stop offset="1" stop-color="#6d4df0"/></linearGradient></defs>
+    ${pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#c4b5fd"/>`).join('')}
+    <text class="axis" x="10" y="10">${max} ${P().unit}</text>
+    <text class="axis" x="10" y="${H-2}">${min} ${P().unit}</text>
+  </svg>`;
+}
+function openWeightSheet(){
+  const last=P().weights[P().weights.length-1];
+  openSheet(`
+    <h2 class="chrome-text" style="font-size:22px;font-weight:900">LOG BODYWEIGHT ⚖️</h2>
+    <div class="field mt14"><label>Weight (${P().unit})</label>
+      <input id="bw-in" type="number" inputmode="decimal" value="${last?last.w:''}" placeholder="e.g. 175"></div>
+    <button class="btn primary full" onclick="saveWeight()">SAVE ✓</button>`);
+  setTimeout(()=>$('#bw-in')?.focus(),350);
+}
+function saveWeight(){
+  const w=parseFloat($('#bw-in').value);
+  if(!w){alert('Enter your weight');return;}
+  const ws=P().weights,t=today();
+  const ix=ws.findIndex(x=>dayKey(x.ts)===t);
+  if(ix>=0)ws[ix]={ts:Date.now(),w};else ws.push({ts:Date.now(),w});
+  save();closeSheet();render();
+}
+
+/* ================================================================
+   HISTORY
+   ================================================================ */
+function historyView(){
+  const p=P();
+  const all=[...p.sessions.map(s=>({...s,_k:'lift'})),...p.cardio.map(c=>({...c,_k:c.kind}))]
+    .sort((a,b)=>b.ts-a.ts).slice(0,40);
+  return`
+  <div class="eyebrow">Everything you've logged</div>
+  <h1 class="chrome-text" style="margin-bottom:14px">TRAINING LOG</h1>
+  ${all.length?`<div class="card fade-in">
+    ${all.map(x=>{
+      if(x._k==='lift'){const sets=x.entries.reduce((a,e)=>a+e.sets.length,0);
+        return`<div class="hist-row"><div class="dot"></div>
+          <div style="flex:1"><b>${esc(x.name)}</b><div class="muted">${sets} sets · ${fmtTime(x.dur)} · ${x.entries.map(e=>exById(e.ex)?.name).filter(Boolean).slice(0,3).join(', ')}${x.entries.length>3?'…':''}</div></div>
+          <span class="muted" style="flex:none">${fmtDate(x.ts)}</span></div>`;}
+      if(x._k==='run')return`<div class="hist-row"><div class="dot" style="background:linear-gradient(135deg,#5eead4,#0d9488)"></div>
+        <div style="flex:1"><b>Mile Run 🏃</b><div class="muted">${x.dist} mi · ${fmtTime(x.sec)} (${fmtTime(x.sec/x.dist)}/mi)</div></div>
+        <span class="muted" style="flex:none">${fmtDate(x.ts)}</span></div>`;
+      return`<div class="hist-row"><div class="dot" style="background:linear-gradient(135deg,#93c5fd,#2563eb)"></div>
+        <div style="flex:1"><b>Swim 🌊</b><div class="muted">${x.laps} laps · ${fmtTime(x.sec)}</div></div>
+        <span class="muted" style="flex:none">${fmtDate(x.ts)}</span></div>`;
+    }).join('')}
+  </div>`:`<div class="card muted">Nothing logged yet — hit TRAIN and get after it ⚡</div>`}
+  ${prList()}`;
+}
+function prList(){
+  const prs=EX.map(e=>({e,pr:prFor(e.id)})).filter(x=>x.pr>0).sort((a,b)=>b.pr-a.pr).slice(0,8);
+  if(!prs.length)return'';
+  return`<div class="card fade-in"><div class="eyebrow" style="margin-bottom:8px">🏆 Personal records</div>
+    ${prs.map(x=>`<div class="hist-row"><div style="flex:1"><b>${esc(x.e.name)}</b></div>
+      <span class="chip good">${x.pr} ${P().unit}</span></div>`).join('')}</div>`;
+}
+
+/* ================================================================
+   SETTINGS
+   ================================================================ */
+function settingsView(){
+  const p=P();
+  return`
+  <div class="eyebrow">Make it yours</div>
+  <h1 class="chrome-text" style="margin-bottom:14px">SETTINGS</h1>
+
+  <div class="card fade-in">
+    <div class="eyebrow" style="margin-bottom:10px">Profile</div>
+    <div class="field"><label>Your name</label>
+      <input value="${esc(p.name)}" onchange="P().name=this.value;save()"></div>
+    <div class="field"><label>Units</label>
+      <select onchange="P().unit=this.value;save();render()">
+        <option value="lb" ${p.unit==='lb'?'selected':''}>Pounds (lb)</option>
+        <option value="kg" ${p.unit==='kg'?'selected':''}>Kilograms (kg)</option>
+      </select></div>
+    <div class="field"><label>Rest timer (seconds)</label>
+      <input type="number" value="${p.restSec}" onchange="P().restSec=parseInt(this.value)||90;save()"></div>
+    <div class="field"><label>Switch profile — anyone can use this app</label>
+      <select onchange="if(this.value==='__new'){newProfile()}else{DATA.active=this.value;save();render()}">
+        ${Object.entries(DATA.profiles).map(([id,pr])=>`<option value="${id}" ${id===DATA.active?'selected':''}>${esc(pr.name)}</option>`).join('')}
+        <option value="__new">＋ New profile…</option>
+      </select></div>
+  </div>
+
+  <div class="card fade-in">
+    <div class="eyebrow" style="margin-bottom:10px">⌚ Apple Watch & heart rate</div>
+    <div class="muted">
+      • <b>Add to Home Screen</b> (Share → Add to Home Screen in Safari) to run EOS PULSE full-screen like a native app.<br><br>
+      • Start the matching workout (<b>Traditional Strength Training</b>, <b>Outdoor Run</b>, or <b>Pool Swim</b>) on your Apple Watch when you start here — the Watch handles heart rate, calories & rings in Apple Health while EOS PULSE tracks your sets, weights & PRs.<br><br>
+      • <b>Live heart rate in-app:</b> works via Bluetooth in Chrome/Edge with any BLE heart-rate monitor (or an Apple Watch running an HR-broadcast app).
+    </div>
+    <button class="btn full mt14" onclick="connectHR()">📡 Connect heart-rate monitor</button>
+    <div id="hr-status" class="muted mt8" style="text-align:center">${hrStatusText()}</div>
+  </div>
+
+  <div class="card fade-in">
+    <div class="eyebrow" style="margin-bottom:10px">Data</div>
+    <div class="grid2">
+      <button class="btn" onclick="exportData()">⬇ Export backup</button>
+      <button class="btn" onclick="$('#imp-file').click()">⬆ Import backup</button>
+    </div>
+    <input id="imp-file" type="file" accept=".json" style="display:none" onchange="importData(this)">
+    <button class="btn full mt8 danger" onclick="wipeProfile()">🗑 Erase this profile's data</button>
+  </div>
+  <div class="muted" style="text-align:center;margin:6px 0 20px">EOS PULSE · all data stays on your device</div>`;
+}
+function newProfile(){
+  const name=prompt('Name for the new profile:');
+  if(!name){render();return;}
+  const id='p'+Date.now();
+  DATA.profiles[id]=blankProfile(name);DATA.active=id;save();render();
+}
+function wipeProfile(){
+  if(!confirm('Erase ALL workouts, runs, swims and weights for '+P().name+'? This cannot be undone.'))return;
+  DATA.profiles[DATA.active]=blankProfile(P().name);save();render();
+}
+function exportData(){
+  const blob=new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='eos-pulse-backup-'+today()+'.json';a.click();
+}
+function importData(inp){
+  const f=inp.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);
+    if(!d.profiles)throw 0;DATA=d;save();render();alert('Backup restored ✓');}
+    catch(e){alert('That file doesn\'t look like an EOS PULSE backup.');}};
+  r.readAsText(f);
+}
+
+/* ================================================================
+   REST TIMER
+   ================================================================ */
+let restInt=null,restLeft=0;
+function startRest(){
+  killRest();restLeft=P().restSec;
+  $('#restsec').textContent=restLeft;
+  $('#restchip').classList.add('show');
+  restInt=setInterval(()=>{
+    restLeft--;$('#restsec').textContent=restLeft;
+    if(restLeft<=0){killRest();if(navigator.vibrate)navigator.vibrate([120,60,120]);}
+  },1000);
+}
+function killRest(){clearInterval(restInt);$('#restchip').classList.remove('show');}
+
+/* ================================================================
+   HEART RATE (Web Bluetooth)
+   ================================================================ */
+let HR={bpm:null,device:null};
+function hrChipHTML(){return HR.bpm?`<span class="hrchip"><span class="beat">❤️</span>${HR.bpm} <span style="font-size:11px;color:var(--dim)">BPM</span></span>`:'';}
+function hrStatusText(){
+  if(HR.bpm)return'❤️ Connected — '+HR.bpm+' BPM';
+  if(!navigator.bluetooth)return'Bluetooth not available in this browser (on iPhone, use the Apple Watch Workout app alongside).';
+  return'Not connected';
+}
+async function connectHR(){
+  if(!navigator.bluetooth){alert('This browser doesn\'t support Web Bluetooth. On iPhone, just start the workout on your Apple Watch — Apple Health captures heart rate automatically.');return;}
+  try{
+    const device=await navigator.bluetooth.requestDevice({filters:[{services:['heart_rate']}]});
+    const server=await device.gatt.connect();
+    const svc=await server.getPrimaryService('heart_rate');
+    const ch=await svc.getCharacteristic('heart_rate_measurement');
+    await ch.startNotifications();
+    ch.addEventListener('characteristicvaluechanged',e=>{
+      const v=e.target.value;
+      HR.bpm=(v.getUint8(0)&1)?v.getUint16(1,true):v.getUint8(1);
+      const chip=$('#hr-home');if(chip)chip.innerHTML=hrChipHTML();
+      const st=$('#hr-status');if(st)st.textContent=hrStatusText();
+    });
+    HR.device=device;
+    device.addEventListener('gattserverdisconnected',()=>{HR.bpm=null;HR.device=null;render();});
+    render();
+  }catch(e){/* user cancelled or failed — no-op */}
+}
+
+/* ================================================================
+   SHEET
+   ================================================================ */
+function openSheet(html){$('#sheet-body').innerHTML=html;document.body.classList.add('sheet-open');}
+function closeSheet(){document.body.classList.remove('sheet-open');}
+
+/* go */
+render();
+</script>
+</body>
+</html>
