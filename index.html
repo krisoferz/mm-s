@@ -230,64 +230,116 @@ const EX=[
   // chest
   E('bb-bench','Barbell Bench Press','barbell',['chest'],['triceps','shoulders']),
   E('bb-incline','Incline Barbell Press','barbell',['chest'],['shoulders','triceps']),
+  E('bb-decline','Decline Barbell Press','barbell',['chest'],['triceps']),
   E('db-incline','Incline Dumbbell Press','dumbbell',['chest'],['shoulders','triceps']),
   E('db-flat','Flat Dumbbell Press','dumbbell',['chest'],['triceps']),
+  E('db-decline','Decline Dumbbell Press','dumbbell',['chest'],['triceps']),
+  E('db-fly','Flat Dumbbell Fly','dumbbell',['chest'],[]),
+  E('db-incline-fly','Incline Dumbbell Fly','dumbbell',['chest'],['shoulders']),
+  E('db-pullover','Dumbbell Pullover','dumbbell',['chest'],['lats']),
   E('mach-chest','Machine Chest Press','machine',['chest'],['triceps']),
+  E('mach-incline','Incline Machine Press','machine',['chest'],['shoulders','triceps']),
+  E('smith-bench','Smith Machine Bench Press','machine',['chest'],['triceps']),
   E('pec-deck','Pec Deck Fly','machine',['chest'],[]),
   E('cable-cross','Cable Crossover','cable',['chest'],[]),
+  E('cable-low-fly','Low-to-High Cable Fly','cable',['chest'],['shoulders']),
+  E('pushup','Push-Up','bodyweight',['chest'],['triceps','shoulders']),
+  E('dip-chest','Chest Dip','bodyweight',['chest'],['triceps']),
   // shoulders
   E('mach-shoulder','Machine Shoulder Press','machine',['shoulders'],['triceps']),
   E('db-shoulder','Seated Dumbbell Shoulder Press','dumbbell',['shoulders'],['triceps']),
+  E('db-arnold','Arnold Press','dumbbell',['shoulders'],['triceps']),
   E('bb-ohp','Barbell Overhead Press','barbell',['shoulders'],['triceps','abs']),
+  E('smith-ohp','Smith Machine Shoulder Press','machine',['shoulders'],['triceps']),
   E('db-lateral','Dumbbell Lateral Raise','dumbbell',['shoulders'],[]),
   E('cable-lateral','Cable Lateral Raise','cable',['shoulders'],[]),
+  E('mach-lateral','Machine Lateral Raise','machine',['shoulders'],[]),
+  E('db-front-raise','Dumbbell Front Raise','dumbbell',['shoulders'],[]),
   E('mach-rear-delt','Machine Rear Delt Fly','machine',['shoulders'],['traps']),
+  E('db-rear-fly','Bent-Over Dumbbell Rear Fly','dumbbell',['shoulders'],['traps']),
   E('face-pull','Cable Face Pull','cable',['shoulders'],['traps']),
+  E('bb-upright-row','Barbell Upright Row','barbell',['shoulders'],['traps']),
   // triceps
   E('tri-pushdown','Cable Triceps Pushdown','cable',['triceps'],[]),
+  E('tri-rope','Rope Pushdown','cable',['triceps'],[]),
   E('tri-overhead','Overhead Cable Extension','cable',['triceps'],[]),
   E('mach-dip','Machine Dip','machine',['triceps'],['chest']),
+  E('mach-tri-ext','Machine Triceps Extension','machine',['triceps'],[]),
   E('skullcrusher','EZ-Bar Skullcrusher','barbell',['triceps'],[]),
+  E('cgbp','Close-Grip Bench Press','barbell',['triceps'],['chest']),
   E('db-tri-oh','Dumbbell Overhead Extension','dumbbell',['triceps'],[]),
+  E('db-kickback','Dumbbell Kickback','dumbbell',['triceps'],[]),
+  E('bench-dip','Bench Dip','bodyweight',['triceps'],['chest']),
   // back
   E('lat-pulldown','Lat Pulldown','machine',['lats'],['biceps']),
+  E('cg-pulldown','Close-Grip Pulldown','machine',['lats'],['biceps']),
   E('bb-row','Barbell Row','barbell',['lats'],['traps','biceps','lowerback']),
+  E('pendlay-row','Pendlay Row','barbell',['lats'],['traps','biceps']),
   E('cable-row','Seated Cable Row','cable',['lats'],['biceps','traps']),
   E('mach-high-row','Machine High Row','machine',['lats'],['biceps']),
+  E('mach-row','Machine Seated Row','machine',['lats'],['biceps','traps']),
   E('db-row','Single-Arm Dumbbell Row','dumbbell',['lats'],['biceps']),
+  E('chest-supp-row','Chest-Supported Dumbbell Row','dumbbell',['lats'],['traps','biceps']),
   E('assist-pullup','Assisted Pull-Up Machine','machine',['lats'],['biceps']),
+  E('pullup','Pull-Up','bodyweight',['lats'],['biceps']),
+  E('chinup','Chin-Up','bodyweight',['lats'],['biceps']),
   E('tbar-row','T-Bar Row','barbell',['lats'],['traps','biceps']),
+  E('straight-pulldown','Straight-Arm Pulldown','cable',['lats'],[]),
+  E('deadlift','Barbell Deadlift','barbell',['lats'],['lowerback','glutes','hamstrings','traps']),
   // biceps
   E('db-curl','Dumbbell Curl','dumbbell',['biceps'],['forearms']),
   E('bb-curl','Barbell Curl','barbell',['biceps'],['forearms']),
+  E('ez-curl','EZ-Bar Curl','barbell',['biceps'],['forearms']),
   E('mach-preacher','Machine Preacher Curl','machine',['biceps'],[]),
+  E('db-preacher','Dumbbell Preacher Curl','dumbbell',['biceps'],[]),
+  E('cable-curl','Cable Curl','cable',['biceps'],['forearms']),
   E('cable-hammer','Cable Hammer Curl','cable',['biceps'],['forearms']),
+  E('db-hammer','Dumbbell Hammer Curl','dumbbell',['biceps'],['forearms']),
   E('db-incline-curl','Incline Dumbbell Curl','dumbbell',['biceps'],[]),
+  E('db-conc-curl','Concentration Curl','dumbbell',['biceps'],[]),
+  E('bb-wrist-curl','Barbell Wrist Curl','barbell',['forearms'],[]),
+  E('db-wrist-curl','Dumbbell Wrist Curl','dumbbell',['forearms'],[]),
   // legs
   E('bb-squat','Barbell Back Squat','barbell',['quads'],['glutes','hamstrings','lowerback']),
+  E('bb-front-squat','Barbell Front Squat','barbell',['quads'],['glutes','abs']),
   E('smith-squat','Smith Machine Squat','machine',['quads'],['glutes']),
   E('leg-press','Leg Press','machine',['quads'],['glutes']),
   E('hack-squat','Hack Squat Machine','machine',['quads'],['glutes']),
+  E('pendulum-squat','Pendulum Squat','machine',['quads'],['glutes']),
   E('leg-ext','Leg Extension','machine',['quads'],[]),
+  E('goblet-squat','Goblet Squat','dumbbell',['quads'],['glutes']),
   E('walking-lunge','Walking Dumbbell Lunge','dumbbell',['quads'],['glutes']),
+  E('bb-lunge','Barbell Reverse Lunge','barbell',['quads'],['glutes']),
   E('bulg-split','Bulgarian Split Squat','dumbbell',['quads'],['glutes']),
+  E('step-up','Dumbbell Step-Up','dumbbell',['quads'],['glutes']),
   E('bb-rdl','Barbell Romanian Deadlift','barbell',['hamstrings'],['glutes','lowerback']),
   E('db-rdl','Dumbbell Romanian Deadlift','dumbbell',['hamstrings'],['glutes']),
   E('seated-curl','Seated Leg Curl','machine',['hamstrings'],[]),
   E('lying-curl','Lying Leg Curl','machine',['hamstrings'],[]),
+  E('good-morning','Barbell Good Morning','barbell',['hamstrings'],['lowerback','glutes']),
   E('bb-hipthrust','Barbell Hip Thrust','barbell',['glutes'],['hamstrings']),
+  E('db-hipthrust','Dumbbell Hip Thrust','dumbbell',['glutes'],['hamstrings']),
   E('mach-glutedrive','Glute Drive Machine','machine',['glutes'],['hamstrings']),
+  E('cable-kickback','Cable Glute Kickback','cable',['glutes'],['hamstrings']),
   E('abductor','Hip Abductor Machine','machine',['glutes'],[]),
+  E('adductor','Hip Adductor Machine','machine',['quads'],['glutes']),
   E('stand-calf','Standing Calf Raise Machine','machine',['calves'],[]),
   E('seat-calf','Seated Calf Raise','machine',['calves'],[]),
+  E('press-calf','Leg Press Calf Raise','machine',['calves'],[]),
+  E('db-calf','Dumbbell Standing Calf Raise','dumbbell',['calves'],[]),
   // core / traps / low back
   E('cable-crunch','Cable Crunch','cable',['abs'],[]),
   E('mach-crunch','Ab Crunch Machine','machine',['abs'],[]),
   E('hang-knee','Hanging Knee Raise','bodyweight',['abs'],['forearms']),
+  E('leg-raise','Lying Leg Raise','bodyweight',['abs'],[]),
   E('plank','Plank','bodyweight',['abs'],['lowerback']),
+  E('russian-twist','Weighted Russian Twist','dumbbell',['abs'],[]),
+  E('cable-woodchop','Cable Woodchopper','cable',['abs'],['shoulders']),
   E('db-shrug','Dumbbell Shrug','dumbbell',['traps'],['forearms']),
   E('bb-shrug','Barbell Shrug','barbell',['traps'],['forearms']),
+  E('mach-shrug','Machine Shrug','machine',['traps'],['forearms']),
   E('back-ext','Back Extension','machine',['lowerback'],['glutes','hamstrings']),
+  E('farmer-carry','Dumbbell Farmer Carry','dumbbell',['forearms'],['traps','abs']),
 ];
 const exById=id=>EX.find(e=>e.id===id);
 
@@ -845,26 +897,145 @@ function saveWeight(){
 function historyView(){
   const p=P();
   const all=[...p.sessions.map(s=>({...s,_k:'lift'})),...p.cardio.map(c=>({...c,_k:c.kind}))]
-    .sort((a,b)=>b.ts-a.ts).slice(0,40);
+    .sort((a,b)=>b.ts-a.ts).slice(0,60);
   return`
   <div class="eyebrow">Everything you've logged</div>
-  <h1 class="chrome-text" style="margin-bottom:14px">TRAINING LOG</h1>
+  <h1 class="chrome-text" style="margin-bottom:4px">TRAINING LOG</h1>
+  <div class="muted" style="margin-bottom:14px">Tap any entry to edit or delete it ✏️</div>
   ${all.length?`<div class="card fade-in">
     ${all.map(x=>{
       if(x._k==='lift'){const sets=x.entries.reduce((a,e)=>a+e.sets.length,0);
-        return`<div class="hist-row"><div class="dot"></div>
+        return`<div class="hist-row" style="cursor:pointer" onclick="openLiftEditor(${x.ts})"><div class="dot"></div>
           <div style="flex:1"><b>${esc(x.name)}</b><div class="muted">${sets} sets · ${fmtTime(x.dur)} · ${x.entries.map(e=>exById(e.ex)?.name).filter(Boolean).slice(0,3).join(', ')}${x.entries.length>3?'…':''}</div></div>
-          <span class="muted" style="flex:none">${fmtDate(x.ts)}</span></div>`;}
-      if(x._k==='run')return`<div class="hist-row"><div class="dot" style="background:linear-gradient(135deg,#5eead4,#0d9488)"></div>
+          <span class="muted" style="flex:none">${fmtDate(x.ts)} ›</span></div>`;}
+      if(x._k==='run')return`<div class="hist-row" style="cursor:pointer" onclick="openCardioEditor(${x.ts})"><div class="dot" style="background:linear-gradient(135deg,#5eead4,#0d9488)"></div>
         <div style="flex:1"><b>Mile Run 🏃</b><div class="muted">${x.dist} mi · ${fmtTime(x.sec)} (${fmtTime(x.sec/x.dist)}/mi)</div></div>
-        <span class="muted" style="flex:none">${fmtDate(x.ts)}</span></div>`;
-      return`<div class="hist-row"><div class="dot" style="background:linear-gradient(135deg,#93c5fd,#2563eb)"></div>
+        <span class="muted" style="flex:none">${fmtDate(x.ts)} ›</span></div>`;
+      return`<div class="hist-row" style="cursor:pointer" onclick="openCardioEditor(${x.ts})"><div class="dot" style="background:linear-gradient(135deg,#93c5fd,#2563eb)"></div>
         <div style="flex:1"><b>Swim 🌊</b><div class="muted">${x.laps} laps · ${fmtTime(x.sec)}</div></div>
-        <span class="muted" style="flex:none">${fmtDate(x.ts)}</span></div>`;
+        <span class="muted" style="flex:none">${fmtDate(x.ts)} ›</span></div>`;
     }).join('')}
   </div>`:`<div class="card muted">Nothing logged yet — hit TRAIN and get after it ⚡</div>`}
   ${prList()}`;
 }
+
+/* ---------------- edit a past lift session ---------------- */
+function findSession(ts){return P().sessions.find(s=>s.ts===ts);}
+function dateInputValue(ts){const d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function openLiftEditor(ts){
+  const s=findSession(ts);if(!s)return;
+  openSheet(liftEditorHTML(ts));
+}
+function liftEditorHTML(ts){
+  const s=findSession(ts),p=P();
+  return`
+    <div class="eyebrow">Edit past workout</div>
+    <h2 class="chrome-text" style="font-size:22px;font-weight:900">${esc(s.name).toUpperCase()}</h2>
+    <div class="field mt14"><label>Date</label>
+      <input type="date" value="${dateInputValue(s.ts)}" onchange="setSessionDate(${ts},this.value)"></div>
+    ${s.entries.map((en,i)=>{const ex=exById(en.ex);return`
+      <div class="card" style="padding:13px;margin-bottom:10px">
+        <div class="spread">
+          <div style="min-width:0"><b>${esc(ex?ex.name:en.ex)}</b>
+            <div class="row mt8" style="gap:5px;flex-wrap:wrap">${ex?equipChip(ex):''}</div></div>
+          <div class="row">
+            <button class="iconbtn" title="Swap exercise" onclick="swapHistEx(${ts},${i})">⇆</button>
+            <button class="iconbtn" style="color:var(--danger)" onclick="delHistEx(${ts},${i})">✕</button>
+          </div>
+        </div>
+        <div class="sets-head"><span>SET</span><span>${p.unit.toUpperCase()}</span><span>REPS</span><span></span></div>
+        ${en.sets.map((st,j)=>`
+        <div class="set-row">
+          <div class="set-num">${j+1}</div>
+          <input type="number" inputmode="decimal" value="${st.w}" onchange="editHistSet(${ts},${i},${j},'w',this.value)">
+          <input type="number" inputmode="numeric" value="${st.r}" onchange="editHistSet(${ts},${i},${j},'r',this.value)">
+          <button class="check" style="color:var(--danger);border-color:rgba(251,113,133,.3)" onclick="delHistSet(${ts},${i},${j})">✕</button>
+        </div>`).join('')}
+        <button class="btn small ghost" onclick="addHistSet(${ts},${i})">+ add set</button>
+      </div>`;}).join('')}
+    <button class="btn full mt8" onclick="openAddHistEx(${ts})">+ Add exercise</button>
+    <div class="grid2 mt8">
+      <button class="btn danger" onclick="delSession(${ts})">🗑 Delete workout</button>
+      <button class="btn primary" onclick="closeSheet();render()">Done ✓</button>
+    </div>`;
+}
+function refreshLiftEditor(ts){if(findSession(ts))$('#sheet-body').innerHTML=liftEditorHTML(ts);else{closeSheet();render();}}
+function setSessionDate(ts,val){
+  const s=findSession(ts);if(!s||!val)return;
+  const[y,m,d]=val.split('-').map(Number);const nd=new Date(s.ts);nd.setFullYear(y,m-1,d);
+  s.ts=nd.getTime();save();
+  // ts changed — rebuild editor against new ts
+  $('#sheet-body').innerHTML=liftEditorHTML(s.ts);
+}
+function editHistSet(ts,i,j,k,v){const s=findSession(ts);if(!s)return;s.entries[i].sets[j][k]=v===''?0:parseFloat(v);save();}
+function delHistSet(ts,i,j){const s=findSession(ts);if(!s)return;s.entries[i].sets.splice(j,1);
+  if(!s.entries[i].sets.length)s.entries.splice(i,1);save();refreshLiftEditor(ts);}
+function addHistSet(ts,i){const s=findSession(ts);if(!s)return;const arr=s.entries[i].sets;
+  arr.push({w:arr[arr.length-1]?.w||0,r:arr[arr.length-1]?.r||0,done:true});save();refreshLiftEditor(ts);}
+function delHistEx(ts,i){const s=findSession(ts);if(!s)return;
+  if(!confirm('Remove '+(exById(s.entries[i].ex)?.name||'this exercise')+' from this workout?'))return;
+  s.entries.splice(i,1);save();refreshLiftEditor(ts);}
+function delSession(ts){if(!confirm('Delete this entire workout? This cannot be undone.'))return;
+  P().sessions=P().sessions.filter(s=>s.ts!==ts);save();closeSheet();render();}
+function swapHistEx(ts,i){
+  const s=findSession(ts);if(!s)return;const cur=exById(s.entries[i].ex);
+  const alts=EX.filter(e=>!cur||e.p[0]===cur.p[0]).sort((a,b)=>P().equipPref.indexOf(a.equip)-P().equipPref.indexOf(b.equip));
+  openSheet(`
+    <div class="eyebrow">Swap exercise</div>
+    <h2 class="chrome-text" style="font-size:20px;font-weight:900">${esc(cur?cur.name:'Exercise')}</h2>
+    <div class="divider"></div>
+    ${alts.map(a=>`<div class="alt-row" onclick="doSwapHist(${ts},${i},'${a.id}')">
+      <div style="flex:1"><b>${esc(a.name)}</b><div class="row mt8" style="gap:5px;flex-wrap:wrap">${equipChip(a)}${muscleChips(a)}</div></div>
+      <span style="color:var(--accent);font-size:20px">⇆</span></div>`).join('')}
+    <button class="btn full mt8" onclick="$('#sheet-body').innerHTML=liftEditorHTML(${ts})">‹ Back</button>`);
+}
+function doSwapHist(ts,i,newId){const s=findSession(ts);if(!s)return;s.entries[i].ex=newId;save();$('#sheet-body').innerHTML=liftEditorHTML(ts);}
+function openAddHistEx(ts){
+  const groups={};EX.forEach(e=>{(groups[e.p[0]]=groups[e.p[0]]||[]).push(e);});
+  openSheet(`
+    <div class="eyebrow">Add to this workout</div>
+    <h2 class="chrome-text" style="font-size:22px;font-weight:900">EXERCISE LIBRARY</h2>
+    ${Object.entries(groups).map(([m,list])=>`
+      <div class="eyebrow mt14" style="margin-bottom:6px">${MUSCLES[m]}</div>
+      ${list.map(e=>`<div class="alt-row" onclick="addHistEx(${ts},'${e.id}')">
+        <div style="flex:1"><b>${esc(e.name)}</b><div class="row mt8" style="gap:5px">${equipChip(e)}</div></div>
+        <span style="color:var(--good);font-size:20px">+</span></div>`).join('')}`).join('')}
+    <button class="btn full mt8" onclick="$('#sheet-body').innerHTML=liftEditorHTML(${ts})">‹ Back</button>`);
+}
+function addHistEx(ts,exId){const s=findSession(ts);if(!s)return;
+  s.entries.push({ex:exId,sets:[{w:0,r:10,done:true}]});save();$('#sheet-body').innerHTML=liftEditorHTML(ts);}
+
+/* ---------------- edit a past run / swim ---------------- */
+function openCardioEditor(ts){
+  const c=P().cardio.find(x=>x.ts===ts);if(!c)return;
+  const mins=Math.floor(c.sec/60),secs=Math.round(c.sec%60),run=c.kind==='run';
+  openSheet(`
+    <div class="eyebrow">Edit ${run?'run':'swim'}</div>
+    <h2 class="chrome-text" style="font-size:22px;font-weight:900">${run?'MILE RUN 🏃':'SWIM 🌊'}</h2>
+    <div class="field mt14"><label>Date</label>
+      <input type="date" id="ce-date" value="${dateInputValue(ts)}"></div>
+    <div class="field"><label>${run?'Distance (miles)':'Laps completed'}</label>
+      <input id="ce-dist" type="number" inputmode="decimal" value="${run?c.dist:c.laps}" step="${run?'0.05':'1'}"></div>
+    <div class="grid2">
+      <div class="field"><label>Minutes</label><input id="ce-min" type="number" inputmode="numeric" value="${mins}"></div>
+      <div class="field"><label>Seconds</label><input id="ce-sec" type="number" inputmode="numeric" value="${secs}"></div>
+    </div>
+    <div class="grid2 mt8">
+      <button class="btn danger" onclick="delCardio(${ts})">🗑 Delete</button>
+      <button class="btn primary" onclick="saveCardioEdit(${ts})">Save ✓</button>
+    </div>`);
+}
+function saveCardioEdit(ts){
+  const c=P().cardio.find(x=>x.ts===ts);if(!c)return;
+  const sec=(parseInt($('#ce-min').value)||0)*60+(parseInt($('#ce-sec').value)||0);
+  if(sec<=0){alert('Enter a time');return;}
+  const d=parseFloat($('#ce-dist').value)||0;
+  c.sec=sec;if(c.kind==='run')c.dist=d||1;else c.laps=d;
+  const val=$('#ce-date').value;if(val){const[y,m,dd]=val.split('-').map(Number);const nd=new Date(c.ts);nd.setFullYear(y,m-1,dd);c.ts=nd.getTime();}
+  save();closeSheet();render();
+}
+function delCardio(ts){if(!confirm('Delete this entry?'))return;
+  P().cardio=P().cardio.filter(x=>x.ts!==ts);save();closeSheet();render();}
 function prList(){
   const prs=EX.map(e=>({e,pr:prFor(e.id)})).filter(x=>x.pr>0).sort((a,b)=>b.pr-a.pr).slice(0,8);
   if(!prs.length)return'';
