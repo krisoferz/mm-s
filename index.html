@@ -368,6 +368,8 @@ const DEFAULT_PROGRAMS={
     S('bb-bench',4,'8'),S('bb-row',4,'8'),S('db-shoulder',3,'10'),S('lat-pulldown',3,'10'),S('db-curl',3,'12'),S('tri-pushdown',3,'12')]},
   lower:{name:'Lower Body',icon:'lower',desc:'Full lower-body session',type:'lift',slots:[
     S('bb-rdl',4,'8'),S('hack-squat',3,'10'),S('walking-lunge',3,'12'),S('lying-curl',3,'12'),S('seat-calf',4,'15'),S('cable-crunch',3,'15')]},
+  core:{name:'Core Day',icon:'core',desc:'Abs · Obliques · Lower back',type:'lift',slots:[
+    S('cable-crunch',3,'15'),S('hang-knee',3,'12'),S('russian-twist',3,'20'),S('cable-woodchop',3,'12'),S('leg-raise',3,'15'),S('plank',3,'45')]},
   swim:{name:'Swim Session',icon:'swim',desc:'Pool intervals · full body',type:'swim',blocks:[
     {t:'Warm-up',d:'4 laps easy freestyle'},
     {t:'Main set',d:'8 × 2 laps freestyle, 30s rest between'},
@@ -376,7 +378,7 @@ const DEFAULT_PROGRAMS={
     {t:'Cool-down',d:'2 laps easy, any stroke'}]},
   run:{name:'Mile Run',icon:'run',desc:'Daily mile · pace + streak',type:'run'},
 };
-const PROGRAM_ORDER=['push','pull','legs','upper','lower','swim','run'];
+const PROGRAM_ORDER=['push','pull','legs','upper','lower','core','swim','run'];
 
 /* ---------------- state ---------------- */
 const LS_KEY='eos.pulse.v1';
@@ -384,8 +386,17 @@ let DATA=load();
 function blankProfile(name){return{name,unit:'lb',restSec:90,equipPref:['machine','barbell','dumbbell','cable','bodyweight'],
   programs:JSON.parse(JSON.stringify(DEFAULT_PROGRAMS)),sessions:[],cardio:[],weights:[],lastSets:{}};}
 function load(){
-  try{const d=JSON.parse(localStorage.getItem(LS_KEY));if(d&&d.profiles)return d;}catch(e){}
+  try{const d=JSON.parse(localStorage.getItem(LS_KEY));if(d&&d.profiles){migrate(d);return d;}}catch(e){}
   return{active:'p1',profiles:{p1:blankProfile('Athlete')}};
+}
+/* backfill any default programs added in later versions (e.g. Core Day) */
+function migrate(d){
+  Object.values(d.profiles).forEach(p=>{
+    if(!p.programs)p.programs={};
+    Object.keys(DEFAULT_PROGRAMS).forEach(k=>{
+      if(!p.programs[k])p.programs[k]=JSON.parse(JSON.stringify(DEFAULT_PROGRAMS[k]));
+    });
+  });
 }
 function save(){try{localStorage.setItem(LS_KEY,JSON.stringify(DATA));}catch(e){}}
 function P(){return DATA.profiles[DATA.active];}
@@ -414,6 +425,8 @@ const ICONS={
   download:'<path d="M12 3v12M8 11l4 4 4-4M5 20h14"/>',
   upload:'<path d="M12 21V9M8 13l4-4 4 4M5 4h14"/>',
   spark:'<path d="M12 3l1.6 6.4L20 11l-6.4 1.6L12 19l-1.6-6.4L4 11l6.4-1.6z"/>',
+  core:'<rect x="8" y="3" width="8" height="18" rx="3"/><path d="M8 9h8M8 13h8M8 17h8M12 3v18"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
   check:'<path d="M5 12.5l5 5L19 6"/>',
 };
 /* migrate old emoji program icons in saved profiles */
@@ -571,7 +584,8 @@ function homeView(){
     <div class="card stat"><div class="lbl lblrow">${icon('medal',{size:15})} Best mile</div><div class="big chrome-text">${best?fmtTime(best):'—'}</div></div>
   </div>
 
-  <div class="grid2 fade-in">
+  <button class="btn full fade-in" onclick="startFreestyle()">${icon('plus',{size:17})} Quick log a workout</button>
+  <div class="grid2 fade-in mt8">
     <button class="btn" onclick="startCardio('run')">${icon('run',{size:17})} Run a mile</button>
     <button class="btn" onclick="startCardio('swim')">${icon('swim',{size:17})} Swim sesh</button>
   </div>
@@ -586,6 +600,13 @@ function trainView(){
   return`
   <div class="eyebrow">Choose your session</div>
   <h1 class="chrome-text" style="margin-bottom:16px">TRAIN</h1>
+  <div class="card fade-in" onclick="startFreestyle()" style="cursor:pointer">
+    <div class="pcard">
+      <div class="orb">${icon('plus',{size:26})}</div>
+      <div><h3>Quick Session</h3><div class="sub">Add any exercise on the fly — core, a crunch, anything</div></div>
+      <div class="arrow">›</div>
+    </div>
+  </div>
   ${PROGRAM_ORDER.map(k=>{const pr=p.programs[k];return`
   <div class="card fade-in">
     <div class="pcard" onclick="startProgram('${k}')">
@@ -614,6 +635,30 @@ function startProgram(key){
         sets:Array.from({length:sl.sets},(_,i)=>({w:last?.[i]?.w??'',r:last?.[i]?.r??sl.reps,done:false}))};
     })};
   TAB='train';render();window.scrollTo(0,0);
+}
+/* Quick Log — start an empty session and add whatever you want (a crunch, etc.) */
+function startFreestyle(){
+  SESSION={prog:'freestyle',name:'Quick Session',start:Date.now(),entries:[]};
+  TAB='train';render();window.scrollTo(0,0);
+  openAddSessionExercise();
+}
+function addExerciseToSession(exId){
+  const last=P().lastSets[exId],reps=(exById(exId).p[0]==='abs'||exById(exId).p[0]==='calves')?'15':'10';
+  SESSION.entries.push({ex:exId,reps,
+    sets:Array.from({length:3},(_,i)=>({w:last?.[i]?.w??'',r:last?.[i]?.r??reps,done:false}))});
+  closeSheet();render();window.scrollTo(0,document.body.scrollHeight);
+}
+function openAddSessionExercise(){
+  const groups={};EX.forEach(e=>{(groups[e.p[0]]=groups[e.p[0]]||[]).push(e);});
+  openSheet(`
+    <div class="eyebrow">Add to this session</div>
+    <h2 class="chrome-text" style="font-size:22px;font-weight:900">EXERCISE LIBRARY</h2>
+    <div class="muted mt8">Pick any move — core, a crunch, anything — to add it to today's session.</div>
+    ${Object.entries(groups).map(([m,list])=>`
+      <div class="eyebrow lblrow mt14" style="margin-bottom:6px">${MUSCLES[m]}</div>
+      ${list.map(e=>`<div class="alt-row" onclick="addExerciseToSession('${e.id}')">
+        <div style="flex:1"><b>${esc(e.name)}</b><div class="row mt8" style="gap:5px">${equipChip(e)}</div></div>
+        <span style="color:var(--good);font-size:20px">+</span></div>`).join('')}`).join('')}`);
 }
 function sessionView(){
   const p=P(),doneSets=SESSION.entries.reduce((a,e)=>a+e.sets.filter(s=>s.done).length,0),
@@ -649,7 +694,9 @@ function sessionView(){
       </div>`).join('')}
       <button class="btn small ghost" onclick="addSet(${i})">+ add set</button>
     </div>`;}).join('')}
-  <button class="btn primary full" onclick="finishSession()">FINISH WORKOUT ✦</button>
+  ${SESSION.entries.length?'':`<div class="card muted" style="text-align:center">Empty session — tap <b>Add exercise</b> below to log a crunch or anything else.</div>`}
+  <button class="btn full" onclick="openAddSessionExercise()">${icon('plus',{size:16})} Add exercise</button>
+  <button class="btn primary full mt8" onclick="finishSession()">FINISH WORKOUT ✦</button>
   <button class="btn full mt8 danger" onclick="confirmAbandon()">Discard session</button>`;
 }
 function setVal(i,j,k,v){SESSION.entries[i].sets[j][k]=v===''?'':parseFloat(v);}
