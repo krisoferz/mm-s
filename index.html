@@ -196,6 +196,16 @@ body.sheet-open #sheet-bg{opacity:1;pointer-events:auto}
 @keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .pr-flash{animation:prflash 1.2s ease}
 @keyframes prflash{0%{box-shadow:0 0 0 0 rgba(94,234,212,.7)}70%{box-shadow:0 0 0 14px rgba(94,234,212,0)}100%{box-shadow:none}}
+/* ---- celebration ---- */
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:120;overflow:hidden}
+.confetti-bit{position:absolute;top:-24px;width:9px;height:14px;border-radius:2px;opacity:0;animation:conffall linear forwards}
+@keyframes conffall{0%{opacity:0;transform:translateY(-10vh) rotate(0)}8%{opacity:1}100%{opacity:.9;transform:translateY(108vh) rotate(720deg)}}
+.congrats{font-size:30px;font-weight:900;letter-spacing:.04em;text-align:center;animation:pop .5s cubic-bezier(.2,1.4,.5,1)}
+@keyframes pop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+.trophy-burst{width:74px;height:74px;margin:6px auto 2px;border-radius:22px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,rgba(246,244,255,.2),rgba(124,92,245,.4));border:1px solid rgba(200,190,255,.35);
+  box-shadow:0 8px 30px rgba(124,92,245,.5),inset 0 1px 0 rgba(255,255,255,.4);animation:pop .5s cubic-bezier(.2,1.4,.5,1)}
+.trophy-burst .ico{stroke:#f3efff}
 ::-webkit-scrollbar{display:none}
 /* ---- icon system ---- */
 .ico{flex:none;vertical-align:middle;stroke:currentColor}
@@ -692,7 +702,10 @@ function sessionView(){
         <input type="number" inputmode="numeric" placeholder="${en.reps}" value="${st.r}" onchange="setVal(${i},${j},'r',this.value)">
         <button class="check ${st.done?'done':''}" onclick="toggleSet(${i},${j})">✓</button>
       </div>`).join('')}
-      <button class="btn small ghost" onclick="addSet(${i})">+ add set</button>
+      <div class="row" style="gap:8px">
+        <button class="btn small ghost" onclick="addSet(${i})">+ add set</button>
+        ${en.sets.length>1?`<button class="btn small ghost" style="color:var(--danger)" onclick="removeSet(${i})">− remove set</button>`:''}
+      </div>
     </div>`;}).join('')}
   ${SESSION.entries.length?'':`<div class="card muted" style="text-align:center">Empty session — tap <b>Add exercise</b> below to log a crunch or anything else.</div>`}
   <button class="btn full" onclick="openAddSessionExercise()">${icon('plus',{size:16})} Add exercise</button>
@@ -709,6 +722,7 @@ function toggleSet(i,j){
   if(st.done&&st.w>pr&&pr>0&&el)el.classList.add('pr-flash');
 }
 function addSet(i){const s=SESSION.entries[i].sets;s.push({w:s[s.length-1]?.w??'',r:s[s.length-1]?.r??'',done:false});render();}
+function removeSet(i){const s=SESSION.entries[i].sets;if(s.length>1){s.pop();render();}}
 function confirmAbandon(){if(confirm('Discard this session? Nothing will be saved.')){SESSION=null;render();}}
 function finishSession(){
   const entries=SESSION.entries.map(en=>({ex:en.ex,sets:en.sets.filter(s=>s.done)})).filter(en=>en.sets.length);
@@ -723,9 +737,15 @@ function finishSession(){
   const sess={ts:Date.now(),prog:SESSION.prog,name:SESSION.name,dur:Math.round((Date.now()-SESSION.start)/1000),entries};
   P().sessions.push(sess);save();
   const vol=entries.reduce((a,en)=>a+en.sets.reduce((b,s)=>b+(s.w||0)*(s.r||0),0),0);
+  const setCount=entries.reduce((a,en)=>a+en.sets.length,0);
   SESSION=null;killRest();
+  const cheers=['Congrats! 🎉','Beast mode! ','Crushed it!','Well done!','You showed up!','Another one down!','Strong work!','Get it!'];
+  const cheer=prs.length?'New PR! Congrats!':cheers[Math.floor(Math.random()*cheers.length)];
+  celebrate();
   openSheet(`
-    <h2 class="chrome-text" style="font-size:24px;font-weight:900">SESSION COMPLETE ✦</h2>
+    <div class="trophy-burst">${icon('trophy',{size:38})}</div>
+    <h2 class="chrome-text congrats">${esc(cheer)}</h2>
+    <div class="muted" style="text-align:center;margin:4px 0 4px">${esc(sess.name)} complete · ${setCount} set${setCount===1?'':'s'} logged</div>
     <div class="grid2 mt14">
       <div class="card stat"><div class="lbl">Duration</div><div class="big">${fmtTime(sess.dur)}</div></div>
       <div class="card stat"><div class="lbl">Volume</div><div class="big">${Math.round(vol).toLocaleString()}<span style="font-size:13px"> ${P().unit}</span></div></div>
@@ -735,13 +755,48 @@ function finishSession(){
     <button class="btn primary full mt14" onclick="closeSheet();render()">DONE</button>`);
   render();
 }
+/* silver/purple confetti burst */
+function celebrate(){
+  const old=document.getElementById('confetti');if(old)old.remove();
+  const box=document.createElement('div');box.id='confetti';
+  const colors=['#efeafd','#c4b5fd','#a78bfa','#7c5cf5','#e6e4f2','#8f7ff0'];
+  for(let i=0;i<70;i++){
+    const b=document.createElement('div');b.className='confetti-bit';
+    b.style.left=Math.random()*100+'vw';
+    b.style.background=colors[i%colors.length];
+    b.style.animationDuration=(1.6+Math.random()*1.6)+'s';
+    b.style.animationDelay=(Math.random()*.5)+'s';
+    b.style.transform='scale('+(.6+Math.random()*.8)+')';
+    if(Math.random()>.5)b.style.borderRadius='50%';
+    box.appendChild(b);
+  }
+  document.body.appendChild(box);
+  if(navigator.vibrate)navigator.vibrate([40,40,80]);
+  setTimeout(()=>box.remove(),3600);
+}
 
-/* ---------------- swap exercise ---------------- */
+/* ---------------- swap exercise ----------------
+   Good swaps = same primary muscle, then closest movement (shared
+   secondary muscles), then your preferred equipment. */
+function swapAlternatives(cur){
+  if(!cur)return[];
+  const pref=P().equipPref;
+  return EX.filter(e=>e.id!==cur.id&&e.p[0]===cur.p[0])
+    .map(e=>{
+      const sharedSec=e.s.filter(m=>cur.s.includes(m)).length;      // similar movement
+      const sameEquip=e.equip===cur.equip?1:0;                       // same tool bonus
+      const equipRank=pref.indexOf(e.equip);const er=equipRank<0?9:equipRank;
+      // lower = better
+      const score=er*4 - sharedSec*3 - sameEquip*2;
+      return{e,score};
+    })
+    .sort((a,b)=>a.score-b.score||a.e.name.localeCompare(b.e.name))
+    .map(x=>x.e);
+}
 let SWAP_SAVE=false;
 function openSwapSheet(i){
   const cur=exById(SESSION.entries[i].ex);
-  const alts=EX.filter(e=>e.id!==cur.id&&e.p[0]===cur.p[0])
-    .sort((a,b)=>P().equipPref.indexOf(a.equip)-P().equipPref.indexOf(b.equip));
+  const alts=swapAlternatives(cur);
   SWAP_SAVE=false;
   openSheet(`
     <div class="eyebrow">Swap out</div>
@@ -1073,7 +1128,7 @@ function delSession(ts){if(!confirm('Delete this entire workout? This cannot be 
   P().sessions=P().sessions.filter(s=>s.ts!==ts);save();closeSheet();render();}
 function swapHistEx(ts,i){
   const s=findSession(ts);if(!s)return;const cur=exById(s.entries[i].ex);
-  const alts=EX.filter(e=>!cur||e.p[0]===cur.p[0]).sort((a,b)=>P().equipPref.indexOf(a.equip)-P().equipPref.indexOf(b.equip));
+  const alts=cur?swapAlternatives(cur):EX.slice();
   openSheet(`
     <div class="eyebrow">Swap exercise</div>
     <h2 class="chrome-text" style="font-size:20px;font-weight:900">${esc(cur?cur.name:'Exercise')}</h2>
