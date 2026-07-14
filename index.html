@@ -352,11 +352,17 @@ const EX=[
   // core / traps / low back
   E('cable-crunch','Cable Crunch','cable',['abs'],[]),
   E('mach-crunch','Ab Crunch Machine','machine',['abs'],[]),
+  E('decline-crunch','Decline Weighted Crunch','dumbbell',['abs'],[]),
+  E('weighted-situp','Weighted Sit-Up','dumbbell',['abs'],[]),
   E('hang-knee','Hanging Knee Raise','bodyweight',['abs'],['forearms']),
+  E('hang-leg-raise','Hanging Leg Raise','bodyweight',['abs'],['forearms']),
   E('leg-raise','Lying Leg Raise','bodyweight',['abs'],[]),
   E('plank','Plank','bodyweight',['abs'],['lowerback']),
   E('russian-twist','Weighted Russian Twist','dumbbell',['abs'],[]),
   E('cable-woodchop','Cable Woodchopper','cable',['abs'],['shoulders']),
+  E('pallof','Cable Pallof Press','cable',['abs'],[]),
+  E('cable-sidebend','Cable Side Bend','cable',['abs'],[]),
+  E('db-sidebend','Dumbbell Side Bend','dumbbell',['abs'],[]),
   E('db-shrug','Dumbbell Shrug','dumbbell',['traps'],['forearms']),
   E('bb-shrug','Barbell Shrug','barbell',['traps'],['forearms']),
   E('mach-shrug','Machine Shrug','machine',['traps'],['forearms']),
@@ -368,15 +374,15 @@ const exById=id=>EX.find(e=>e.id===id);
 /* ---------------- default programs ---------------- */
 const S=(ex,sets,reps)=>({ex,sets,reps});
 const DEFAULT_PROGRAMS={
-  push:{name:'Push Day',icon:'push',desc:'Chest · Shoulders · Triceps',type:'lift',slots:[
-    S('bb-bench',4,'8'),S('mach-shoulder',3,'10'),S('db-incline',3,'10'),S('pec-deck',3,'12'),S('db-lateral',3,'15'),S('tri-pushdown',3,'12')]},
-  pull:{name:'Pull Day',icon:'pull',desc:'Back · Biceps · Rear Delts',type:'lift',slots:[
-    S('lat-pulldown',4,'10'),S('bb-row',4,'8'),S('cable-row',3,'10'),S('mach-rear-delt',3,'15'),S('db-curl',3,'12'),S('cable-hammer',3,'12')]},
-  legs:{name:'Leg Day',icon:'legs',desc:'Quads · Hams · Glutes · Calves',type:'lift',slots:[
-    S('bb-squat',4,'6'),S('leg-press',3,'10'),S('leg-ext',3,'12'),S('seated-curl',3,'12'),S('bb-hipthrust',3,'10'),S('stand-calf',4,'15')]},
-  upper:{name:'Upper Body',icon:'upper',desc:'Full upper-body session',type:'lift',slots:[
-    S('bb-bench',4,'8'),S('bb-row',4,'8'),S('db-shoulder',3,'10'),S('lat-pulldown',3,'10'),S('db-curl',3,'12'),S('tri-pushdown',3,'12')]},
-  lower:{name:'Lower Body',icon:'lower',desc:'Full lower-body session',type:'lift',slots:[
+  push:{name:'Push Day',icon:'push',desc:'Chest · Shoulders · Triceps · Core',type:'lift',slots:[
+    S('bb-bench',4,'8'),S('mach-shoulder',3,'10'),S('db-incline',3,'10'),S('pec-deck',3,'12'),S('db-lateral',3,'15'),S('tri-pushdown',3,'12'),S('decline-crunch',3,'15')]},
+  pull:{name:'Pull Day',icon:'pull',desc:'Back · Biceps · Rear Delts · Core',type:'lift',slots:[
+    S('lat-pulldown',4,'10'),S('bb-row',4,'8'),S('cable-row',3,'10'),S('mach-rear-delt',3,'15'),S('db-curl',3,'12'),S('cable-hammer',3,'12'),S('hang-leg-raise',3,'12')]},
+  legs:{name:'Leg Day',icon:'legs',desc:'Quads · Hams · Glutes · Core',type:'lift',slots:[
+    S('bb-squat',4,'6'),S('leg-press',3,'10'),S('leg-ext',3,'12'),S('seated-curl',3,'12'),S('bb-hipthrust',3,'10'),S('stand-calf',4,'15'),S('russian-twist',3,'20')]},
+  upper:{name:'Upper Body',icon:'upper',desc:'Full upper body · Core',type:'lift',slots:[
+    S('bb-bench',4,'8'),S('bb-row',4,'8'),S('db-shoulder',3,'10'),S('lat-pulldown',3,'10'),S('db-curl',3,'12'),S('tri-pushdown',3,'12'),S('pallof',3,'12')]},
+  lower:{name:'Lower Body',icon:'lower',desc:'Full lower body · Core',type:'lift',slots:[
     S('bb-rdl',4,'8'),S('hack-squat',3,'10'),S('walking-lunge',3,'12'),S('lying-curl',3,'12'),S('seat-calf',4,'15'),S('cable-crunch',3,'15')]},
   core:{name:'Core Day',icon:'core',desc:'Abs · Obliques · Lower back',type:'lift',slots:[
     S('cable-crunch',3,'15'),S('hang-knee',3,'12'),S('russian-twist',3,'20'),S('cable-woodchop',3,'12'),S('leg-raise',3,'15'),S('plank',3,'45')]},
@@ -394,18 +400,31 @@ const PROGRAM_ORDER=['push','pull','legs','upper','lower','core','swim','run'];
 const LS_KEY='eos.pulse.v1';
 let DATA=load();
 function blankProfile(name){return{name,unit:'lb',restSec:90,equipPref:['machine','barbell','dumbbell','cable','bodyweight'],
-  programs:JSON.parse(JSON.stringify(DEFAULT_PROGRAMS)),sessions:[],cardio:[],weights:[],lastSets:{}};}
+  programs:JSON.parse(JSON.stringify(DEFAULT_PROGRAMS)),sessions:[],cardio:[],weights:[],lastSets:{},mig:{dailyCore:true}};}
 function load(){
   try{const d=JSON.parse(localStorage.getItem(LS_KEY));if(d&&d.profiles){migrate(d);return d;}}catch(e){}
   return{active:'p1',profiles:{p1:blankProfile('Athlete')}};
 }
-/* backfill any default programs added in later versions (e.g. Core Day) */
+/* one core move per lifting day, spread across the week */
+const DAILY_CORE=[['push','decline-crunch','15'],['pull','hang-leg-raise','12'],['legs','russian-twist','20'],['upper','pallof','12']];
+const isCoreEx=id=>{const x=exById(id);return x&&(x.p[0]==='abs'||x.p[0]==='lowerback');};
+/* backfill programs/features added in later versions */
 function migrate(d){
   Object.values(d.profiles).forEach(p=>{
     if(!p.programs)p.programs={};
     Object.keys(DEFAULT_PROGRAMS).forEach(k=>{
       if(!p.programs[k])p.programs[k]=JSON.parse(JSON.stringify(DEFAULT_PROGRAMS[k]));
     });
+    p.mig=p.mig||{};
+    // add a daily core move to each lift day (once; only if that day has no core yet)
+    if(!p.mig.dailyCore){
+      DAILY_CORE.forEach(([day,exId,reps])=>{
+        const prog=p.programs[day];
+        if(prog&&prog.slots&&!prog.slots.some(s=>isCoreEx(s.ex)))
+          prog.slots.push({ex:exId,sets:3,reps});
+      });
+      p.mig.dailyCore=true;
+    }
   });
 }
 function save(){try{localStorage.setItem(LS_KEY,JSON.stringify(DATA));}catch(e){}}
