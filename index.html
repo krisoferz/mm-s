@@ -398,6 +398,7 @@ const PROGRAM_ORDER=['push','pull','legs','upper','lower','core','swim','run'];
 
 /* ---------------- state ---------------- */
 const LS_KEY='eos.pulse.v1';
+const BUILD='core-days · 2026.07.14';
 let DATA=load();
 function blankProfile(name){return{name,unit:'lb',restSec:90,equipPref:['machine','barbell','dumbbell','cable','bodyweight'],
   programs:JSON.parse(JSON.stringify(DEFAULT_PROGRAMS)),sessions:[],cardio:[],weights:[],lastSets:{},mig:{dailyCore:true}};}
@@ -1259,7 +1260,7 @@ function settingsView(){
     <input id="imp-file" type="file" accept=".json" style="display:none" onchange="importData(this)">
     <button class="btn full mt8 danger" onclick="wipeProfile()">${icon('trash',{size:15})} Erase this profile's data</button>
   </div>
-  <div class="muted" style="text-align:center;margin:6px 0 20px">EOS PULSE · all data stays on your device</div>`;
+  <div class="muted" style="text-align:center;margin:6px 0 20px">EOS PULSE · ${BUILD}<br>all data stays on your device</div>`;
 }
 function newProfile(){
   const name=prompt('Name for the new profile:');
