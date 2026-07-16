@@ -398,7 +398,7 @@ const PROGRAM_ORDER=['push','pull','legs','upper','lower','core','swim','run'];
 
 /* ---------------- state ---------------- */
 const LS_KEY='eos.pulse.v1';
-const BUILD='core-days · 2026.07.14';
+const BUILD='data-safe · 2026.07.16';
 let DATA=load();
 function blankProfile(name){return{name,unit:'lb',restSec:90,equipPref:['machine','barbell','dumbbell','cable','bodyweight'],
   programs:JSON.parse(JSON.stringify(DEFAULT_PROGRAMS)),sessions:[],cardio:[],weights:[],lastSets:{},mig:{dailyCore:true}};}
@@ -1252,8 +1252,12 @@ function settingsView(){
   </div>
 
   <div class="card fade-in">
-    <div class="eyebrow" style="margin-bottom:10px">Data</div>
-    <div class="grid2">
+    <div class="eyebrow lblrow" style="margin-bottom:10px">${icon('scale',{size:14})} Keep my data safe</div>
+    <div id="storage-status">${storageStatusHTML()}</div>
+    <div class="muted mt8" style="line-height:1.55">iPhone tip: Safari erases a website's saved data after <b>7 days</b> of not opening it — but this <b>does not happen</b> once EOS PULSE is on your <b>Home Screen</b>. Open it from the Home Screen icon (not just Safari) and your workouts stay forever.<br><br>Add it: in Safari tap <b>Share</b> → <b>Add to Home Screen</b>.</div>
+    <button class="btn full mt14" onclick="requestPersist(true)">${icon('scale',{size:16})} Protect my data</button>
+    <div class="muted mt14">Belt & suspenders — save a backup file you can re-import anytime (survives even if data is cleared):</div>
+    <div class="grid2 mt8">
       <button class="btn" onclick="exportData()">${icon('download',{size:16})} Export backup</button>
       <button class="btn" onclick="$('#imp-file').click()">${icon('upload',{size:16})} Import backup</button>
     </div>
@@ -1271,6 +1275,28 @@ function newProfile(){
 function wipeProfile(){
   if(!confirm('Erase ALL workouts, runs, swims and weights for '+P().name+'? This cannot be undone.'))return;
   DATA.profiles[DATA.active]=blankProfile(P().name);save();render();
+}
+/* ---- persistent storage (fights iOS 7-day data eviction) ---- */
+let STORAGE_PERSISTED=null;
+const isStandalone=()=>window.matchMedia('(display-mode:standalone)').matches||window.navigator.standalone===true;
+function storageStatusHTML(){
+  if(STORAGE_PERSISTED===true)return `<span class="chip good">${icon('check',{size:13})} Protected — your workouts are set to persist</span>`;
+  if(STORAGE_PERSISTED===false)return `<span class="chip warn">Not protected yet — add to Home Screen & tap “Protect my data”</span>`;
+  return `<span class="chip silver">Checking storage…</span>`;
+}
+async function requestPersist(userAsked){
+  try{
+    if(navigator.storage&&navigator.storage.persisted){
+      STORAGE_PERSISTED=await navigator.storage.persisted();
+      if(!STORAGE_PERSISTED&&navigator.storage.persist)STORAGE_PERSISTED=await navigator.storage.persist();
+    }
+  }catch(e){}
+  const el=document.getElementById('storage-status');if(el)el.innerHTML=storageStatusHTML();
+  if(userAsked){
+    if(STORAGE_PERSISTED)alert('Your data is protected — it will persist on this device. ✓');
+    else if(isStandalone())alert('Requested. Your Home Screen app keeps data safe. Also export a backup to be extra sure.');
+    else alert('For full protection, add EOS PULSE to your Home Screen (Share → Add to Home Screen), then open it from there. Also export a backup file as insurance.');
+  }
 }
 function exportData(){
   const blob=new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'});
@@ -1310,6 +1336,7 @@ function closeSheet(){document.body.classList.remove('sheet-open');}
 /* go */
 render();
 importFromURL();
+requestPersist();
 </script>
 </body>
 </html>
